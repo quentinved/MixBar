@@ -89,6 +89,13 @@ MNT="$(hdiutil attach "$DMG" -nobrowse -readonly | tail -1 | sed 's/^.*\(\/Volum
 spctl --assess --type execute --verbose=2 "$MNT/MixBar.app" || true
 hdiutil detach "$MNT" -quiet
 
-# The cask's checksum changes once the DMG is signed and stapled.
-shasum -a 256 "$DMG" | awk '{print "\nsha256 for the Homebrew cask: " $1}'
+# Stapling rewrites the DMG, so the checksum package.sh wrote into the cask is
+# already stale by now. Correct it in place: a cask whose sha256 does not match
+# the published file fails for every user with a checksum mismatch.
+CASK="$ROOT/build/mixbar.rb"
+SHA="$(shasum -a 256 "$DMG" | cut -d' ' -f1)"
+if [ -f "$CASK" ]; then
+    /usr/bin/sed -i '' -E "s/sha256 \"[a-f0-9]{64}\"/sha256 \"$SHA\"/" "$CASK"
+    echo "cask sha256 updated: $SHA"
+fi
 echo "release ready: $DMG"
