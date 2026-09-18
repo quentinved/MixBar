@@ -1,0 +1,27 @@
+name: Deploy site
+
+# The landing page in site/ is plain static files, so this only runs when they
+# change. Until the repository variable CLOUDFLARE_PROJECT is set, the job skips
+# cleanly rather than failing — the site can also be deployed straight from
+# Cloudflare's dashboard via the Git integration, with no secrets in GitHub.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - ".github/workflows/site.yml"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: vars.CLOUDFLARE_PROJECT != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PROJECT }}

@@ -1,0 +1,224 @@
+/* MixBar — tokens are the ones documented in docs/BRAND.md. Dark mode moves the
+   neutrals only; the gradient never changes, because it is the brand. */
+:root {
+  --brand-indigo: #6B5CF2;
+  --brand-violet: #9E3DE3;
+  --brand: linear-gradient(135deg, var(--brand-indigo), var(--brand-violet));
+
+  --ink: #14101F;
+  --muted: #6B6880;
+  --surface: #FFFFFF;
+  --surface-2: #F6F5FA;
+  --border: #E6E3F0;
+
+  --measure: 34rem;
+  --radius: 14px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #EDEAF5;
+    --muted: #9B96AD;
+    --surface: #0C0A14;
+    --surface-2: #17141F;
+    --border: #262133;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 24px;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--brand-indigo); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+@media (prefers-color-scheme: dark) { a { color: #A79BF7; } }
+
+h1, h2, h3 { letter-spacing: -0.025em; line-height: 1.15; }
+
+/* --- hero --- */
+.hero {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 88px 0 64px;
+  text-align: center;
+}
+.hero__mark { display: block; margin: 0 auto 28px; }
+.hero__name { margin: 0; font-size: clamp(3rem, 9vw, 4.25rem); font-weight: 700; }
+.hero__tagline {
+  margin: 10px 0 0;
+  font-size: clamp(1.25rem, 4vw, 1.5rem);
+  font-weight: 600;
+  background: var(--brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero__sub { margin: 18px auto 0; color: var(--muted); max-width: 30rem; }
+.hero__meta { margin-top: 26px; font-size: 0.875rem; color: var(--muted); }
+
+/* --- buttons --- */
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 34px;
+}
+.button {
+  display: inline-block;
+  padding: 13px 26px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--ink);
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.button--primary {
+  border-color: transparent;
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(107, 92, 242, 0.35);
+}
+.button:hover { transform: translateY(-1px); }
+.button--primary:hover { box-shadow: 0 10px 28px rgba(107, 92, 242, 0.45); }
+.button:focus-visible { outline: 2px solid var(--brand-indigo); outline-offset: 3px; }
+
+/* Unused until a Homebrew tap exists; keep the style ready for `brew install`. */
+.brew {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.875rem;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 11px 20px;
+  white-space: nowrap;
+}
+
+/* --- interface illustration --- */
+.shot { max-width: 30rem; margin: 8px auto 96px; }
+.window {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: 0 24px 60px -24px rgba(20, 16, 31, 0.35);
+}
+.window__head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: var(--muted);
+  padding: 2px 6px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.window__device { color: var(--ink); font-weight: 500; }
+.rows { list-style: none; margin: 0; padding: 8px 0 0; }
+.row {
+  display: grid;
+  grid-template-columns: 22px 5.5rem 1fr 2.75rem;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 6px;
+  font-size: 0.875rem;
+}
+.row__icon {
+  width: 22px; height: 22px; border-radius: 6px;
+  background: linear-gradient(140deg, var(--a), var(--b));
+}
+.row__name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row__track {
+  position: relative;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+}
+.row__fill { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: var(--brand); }
+.row__knob {
+  position: absolute;
+  top: 50%;
+  width: 13px; height: 13px;
+  margin-left: -6.5px;
+  border-radius: 50%;
+  background: #fff;
+  transform: translateY(-50%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.32);
+}
+.row__value { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.8125rem; }
+.row--muted .row__name, .row--muted .row__icon { opacity: 0.5; }
+
+/* --- prose sections --- */
+.section { max-width: var(--measure); margin: 0 auto 88px; }
+.section h2 { font-size: 1.625rem; margin: 0 0 16px; }
+.section p { margin: 0 0 16px; color: var(--muted); }
+.section .lede { color: var(--ink); font-size: 1.0625rem; }
+.section--flag {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 30px 32px 16px;
+  max-width: calc(var(--measure) + 64px);
+}
+.section--flag strong { color: var(--ink); }
+.section--end { text-align: center; }
+.section--end .cta { margin-top: 24px; }
+
+.steps { counter-reset: step; list-style: none; margin: 0; padding: 0; }
+.steps li { position: relative; padding-left: 46px; margin-bottom: 26px; }
+.steps li::before {
+  counter-increment: step;
+  content: counter(step);
+  position: absolute;
+  left: 0; top: 1px;
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.steps h3 { margin: 0 0 4px; font-size: 1rem; }
+.steps p { margin: 0; font-size: 0.9375rem; }
+
+.status { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 20px; }
+.status h3 { font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 10px; }
+.status ul { margin: 0; padding-left: 18px; font-size: 0.9375rem; }
+.status li { margin-bottom: 5px; }
+.note { font-size: 0.9375rem; }
+
+/* --- footer --- */
+.footer {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 36px 0 56px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.footer p { margin: 0 0 8px; }
+.footer__fine { font-size: 0.8125rem; opacity: 0.8; }
+
+@media (max-width: 30rem) {
+  .hero { padding-top: 60px; }
+  .status { grid-template-columns: 1fr; gap: 20px; }
+  .row { grid-template-columns: 22px 4.5rem 1fr 2.5rem; gap: 9px; }
+  .section--flag { padding: 24px 22px 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button { transition: none; }
+  .button:hover { transform: none; }
+}

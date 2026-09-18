@@ -1,0 +1,31 @@
+name: Feature request
+description: Suggest something MixBar should do
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        MixBar tries to do one thing well. The most useful requests explain the
+        situation you are actually in, rather than the feature you have in mind —
+        that often leads somewhere better than the original idea.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      placeholder: I want Spotify on my headphones while everything else stays on the speakers.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What did you have in mind?
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What do you do today instead?
+      description: Including other apps — knowing SoundSource already solves it is useful, not disqualifying.

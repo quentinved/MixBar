@@ -1,0 +1,16 @@
+.DS_Store
+.build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+spike/audiotap-spike.app/
+*.p12
+*.p8
+*.cer
+*.certSigningRequest
+*.mobileprovision
+*.key
+
+# Build artifacts
+build/
+.vscode/*

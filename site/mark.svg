@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="MixBar">
+  <title>MixBar</title>
+  <!-- Geometry mirrors tools/make-icon.swift exactly, so the README mark and the
+       shipped .icns can never drift. Plate inset 9.8%, corner radius 22.37% of
+       the plate, three faders at 0.30 / 0.66 / 0.46 of their track. -->
+  <defs>
+    <linearGradient id="plate" x1="512" y1="100" x2="512" y2="924" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6B5CF2"/>
+      <stop offset="1" stop-color="#9E3DE3"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="512" y1="100" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="plateClip">
+      <rect x="100" y="100" width="824" height="824" rx="184.3" ry="184.3"/>
+    </clipPath>
+  </defs>
+
+  <rect x="100" y="100" width="824" height="824" rx="184.3" ry="184.3" fill="url(#plate)"/>
+  <rect x="100" y="100" width="824" height="824" fill="url(#sheen)" clip-path="url(#plateClip)"/>
+
+  <g fill="#FFFFFF">
+    <g opacity="0.34">
+      <rect x="315.1" y="322.5" width="42.9" height="379" rx="21.4"/>
+      <rect x="490.6" y="322.5" width="42.9" height="379" rx="21.4"/>
+      <rect x="666.1" y="322.5" width="42.9" height="379" rx="21.4"/>
+    </g>
+    <rect x="282.1" y="557.7" width="108.8" height="60.2" rx="30.1"/>
+    <rect x="457.6" y="421.2" width="108.8" height="60.2" rx="30.1"/>
+    <rect x="633.1" y="497.0" width="108.8" height="60.2" rx="30.1"/>
+  </g>
+</svg>

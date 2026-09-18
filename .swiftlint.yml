@@ -1,0 +1,56 @@
+# Style is enforced, not argued about in review.
+#
+# This is SwiftLint's default rule set with the thresholds left where SwiftLint
+# puts them. The one that actually bites is function_body_length: a function
+# longer than ~50 lines is doing more than one thing, and the Core Audio setup
+# code in this project drifted to 118 lines before it was split up.
+#
+#   brew install swiftlint && swiftlint
+
+included:
+  - app/Sources
+  - app/Tests
+  - tools
+
+excluded:
+  - app/.build
+  - spike        # A preserved throwaway experiment; see README. Not shipped.
+
+# SwiftLint defaults, stated explicitly so the numbers are visible rather than
+# implied: warn at 50 lines of body, error at 100.
+function_body_length:
+  warning: 50
+  error: 100
+
+type_body_length:
+  warning: 250
+  error: 350
+
+file_length:
+  warning: 400
+  error: 1000
+
+line_length:
+  warning: 100
+  error: 120
+  ignores_comments: false
+
+# The house style is a trailing comma on every multi-line literal, so that
+# adding an entry touches one line rather than two. SwiftLint's default is the
+# opposite, hence the flag.
+trailing_comma:
+  mandatory_comma: true
+
+identifier_name:
+  # Single-letter names are legitimate in the render loop, where `l`/`r` are
+  # the left and right sample and anything longer obscures the arithmetic.
+  allowed_symbols: ["_"]
+  min_length: 1
+
+opt_in_rules:
+  - force_unwrapping
+  - empty_count
+  - closure_spacing
+  - explicit_init
+  - redundant_nil_coalescing
+  - unneeded_parentheses_in_closure_argument

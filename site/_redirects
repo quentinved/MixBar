@@ -1,0 +1,4 @@
+# Always the newest release, so the link never needs updating on a version bump.
+/download   https://github.com/quentinvedrenne/mixbar/releases/latest   302
+/github     https://github.com/quentinvedrenne/mixbar                   302
+/source     https://github.com/quentinvedrenne/mixbar                   302

@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MixBar — Per-app volume for Mac</title>
+<meta name="description" content="A slider for every app that's making noise, in your Mac's menu bar, plus quick output switching. Free and open source.">
+<meta name="theme-color" content="#6B5CF2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0C0A14" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://mixbar.app/">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="MixBar — Per-app volume for Mac">
+<meta property="og:description" content="A slider for every app that's making noise, in your Mac's menu bar. Free and open source.">
+<meta property="og:url" content="https://mixbar.app/">
+<meta property="og:image" content="https://mixbar.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="/mark.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/mark-1024.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header class="hero">
+  <img class="hero__mark" src="/mark.svg" width="104" height="104" alt="">
+  <h1 class="hero__name">MixBar</h1>
+  <p class="hero__tagline">Per-app volume for Mac.</p>
+  <p class="hero__sub">
+    A slider for every app that's making noise, in the menu bar, plus quick
+    output&#8209;device switching. Free and open source.
+  </p>
+
+  <div class="cta">
+    <a class="button button--primary" href="/download">
+      Download for macOS
+    </a>
+    <a class="button" href="https://github.com/quentinvedrenne/mixbar">View the source</a>
+  </div>
+
+  <p class="hero__meta">
+    Requires macOS 15 or later · Apple silicon and Intel · MIT licensed
+  </p>
+</header>
+
+<main>
+
+  <!-- TODO: replace with a real screenshot of the popover before launch.
+       This is an illustration of the interface, not a capture of it. -->
+  <section class="shot" aria-label="What MixBar looks like">
+    <div class="window">
+      <div class="window__head">
+        <span class="window__title">Output</span>
+        <span class="window__device">MacBook Pro Speakers ▾</span>
+      </div>
+      <ul class="rows">
+        <li class="row">
+          <span class="row__icon" style="--a:#1DB954;--b:#12833c"></span>
+          <span class="row__name">Spotify</span>
+          <span class="row__track"><span class="row__fill" style="width:62%"></span><span class="row__knob" style="left:62%"></span></span>
+          <span class="row__value">62</span>
+        </li>
+        <li class="row">
+          <span class="row__icon" style="--a:#f06543;--b:#d4372a"></span>
+          <span class="row__name">Arc</span>
+          <span class="row__track"><span class="row__fill" style="width:100%"></span><span class="row__knob" style="left:100%"></span></span>
+          <span class="row__value">100</span>
+        </li>
+        <li class="row">
+          <span class="row__icon" style="--a:#5865F2;--b:#3c46b8"></span>
+          <span class="row__name">Discord</span>
+          <span class="row__track"><span class="row__fill" style="width:34%"></span><span class="row__knob" style="left:34%"></span></span>
+          <span class="row__value">34</span>
+        </li>
+        <li class="row row--muted">
+          <span class="row__icon" style="--a:#8e8e93;--b:#636366"></span>
+          <span class="row__name">Music</span>
+          <span class="row__track"><span class="row__fill" style="width:0%"></span><span class="row__knob" style="left:0%"></span></span>
+          <span class="row__value">Muted</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>It stays out of your audio path until you ask</h2>
+    <p class="lede">
+      At default volume MixBar creates nothing at all — no taps, no aggregate
+      device, no presence between your apps and your speakers. An app enters the
+      audio path only once its slider moves, and leaves the moment it goes back
+      to 100%.
+    </p>
+    <p>
+      This is not a detail. An earlier version routed everything through the
+      mixer and caused audible crackling system&#8209;wide, even while mixing pure
+      silence. There is no kernel extension, no virtual audio driver and no
+      installer privileges anywhere in MixBar.
+    </p>
+  </section>
+
+  <section class="section section--flag">
+    <h2>Why it asks for microphone permission</h2>
+    <p>
+      macOS has no per&#8209;app volume API. The only way to change one app's volume
+      is to capture that app's audio and play it back yourself at a different
+      level. Apple classifies reading another app's sound as recording, under the
+      same umbrella as the microphone — so MixBar needs the
+      <strong>Audio Recording</strong> permission, even though it never touches
+      your microphone.
+    </p>
+    <p>
+      What it does with that access: it multiplies buffers by a gain, sums them,
+      and writes them to your output device. Nothing is recorded, written to
+      disk, or sent anywhere. There is no network code in the app at all. You do
+      not have to take that on faith —
+      <a href="https://github.com/quentinvedrenne/mixbar/blob/main/app/Sources/MixBar/Adapters/CoreAudio/RealtimeMixer.swift">read the mixer</a>.
+    </p>
+  </section>
+
+  <section class="section">
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li>
+        <h3>Find what's playing</h3>
+        <p>Enumerate audio processes through Core Audio's process objects.</p>
+      </li>
+      <li>
+        <h3>Group them by app</h3>
+        <p>
+          Browsers and Electron apps play through anonymous helpers, and there is
+          more than one — mute the wrong helper and the sound simply moves to the
+          next. One slider spans all of an app's processes.
+        </p>
+      </li>
+      <li>
+        <h3>Tap only what you adjusted</h3>
+        <p>
+          A private tap spanning that app's processes, marked muted&#8209;when&#8209;tapped
+          so its own path to the speakers goes quiet and MixBar's gain becomes
+          its volume.
+        </p>
+      </li>
+      <li>
+        <h3>Mix in one pass</h3>
+        <p>
+          The output device and every tap go into a single private aggregate
+          device, and one realtime IOProc applies the gains and sums the result.
+        </p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="section">
+    <h2>Where it's at</h2>
+    <div class="status">
+      <div>
+        <h3>Working</h3>
+        <ul>
+          <li>Per-app volume and mute</li>
+          <li>Live meters</li>
+          <li>Output device switching</li>
+          <li>Settings remembered per app</li>
+          <li>Helper-process grouping</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Not yet</h3>
+        <ul>
+          <li>Sleep and wake handling</li>
+          <li>Launch at login</li>
+          <li>Global hotkeys</li>
+          <li>Per-app output routing</li>
+        </ul>
+      </div>
+    </div>
+    <p class="note">
+      MixBar is pre&#8209;1.0 and the second column is where the
+      <a href="https://github.com/quentinvedrenne/mixbar/blob/main/CONTRIBUTING.md">contributions</a>
+      would help most.
+    </p>
+  </section>
+
+  <section class="section section--end">
+    <h2>Get it</h2>
+    <div class="cta">
+      <a class="button button--primary" href="/download">Download for macOS</a>
+      <a class="button" href="https://github.com/quentinvedrenne/mixbar">View the source</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>
+    <a href="https://github.com/quentinvedrenne/mixbar">GitHub</a> ·
+    <a href="https://github.com/quentinvedrenne/mixbar/releases">Releases</a> ·
+    <a href="https://github.com/quentinvedrenne/mixbar/blob/main/LICENSE">MIT licence</a>
+  </p>
+  <p class="footer__fine">
+    Not affiliated with Apple. macOS is a trademark of Apple Inc.
+  </p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,87 @@
+name: Bug report
+description: Something in MixBar does not work
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Audio bugs are very dependent on the exact apps and
+        devices involved, so the details below genuinely matter — "the volume is
+        wrong" is almost impossible to act on without them.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what did MixBar do instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Play audio in Spotify and Arc
+        2. Pull the Spotify slider to 30%
+        3. Switch output to AirPods
+        4. Spotify is now silent instead of quiet
+    validations:
+      required: true
+
+  - type: input
+    id: apps
+    attributes:
+      label: Which apps were playing audio
+      description: Browsers matter especially — say which one, and which tab.
+      placeholder: Spotify 1.2.50, Arc (YouTube tab), Discord
+    validations:
+      required: true
+
+  - type: input
+    id: output
+    attributes:
+      label: Output device
+      placeholder: MacBook Pro speakers / AirPods Pro / Scarlett 2i2 at 48kHz
+    validations:
+      required: true
+
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and Mac model
+      placeholder: 15.3 on M2 MacBook Air
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: MixBar version
+      description: From the menu, or the version of the .dmg you installed.
+      placeholder: "0.1"
+    validations:
+      required: true
+
+  - type: textarea
+    id: log
+    attributes:
+      label: Debug log
+      description: |
+        Turn logging on, reproduce the bug, then paste the relevant part of
+        `~/Library/Logs/MixBar.log`:
+
+        ```sh
+        defaults write com.quentinvedrenne.MixBar debugLogging -bool true
+        ```
+
+        The log contains device and process names. It never contains audio.
+      render: text
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you file
+      options:
+        - label: I granted MixBar the Audio Recording permission in System Settings › Privacy & Security
+        - label: I launched MixBar from Finder or Applications, not from a terminal
