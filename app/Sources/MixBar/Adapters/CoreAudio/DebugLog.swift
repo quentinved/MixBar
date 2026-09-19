@@ -4,7 +4,7 @@ import Foundation
 /// reaches `log show`, and launching via `open` discards stderr.
 enum DebugLog {
     /// Off unless asked for:
-    ///   defaults write com.quentinvedrenne.MixBar debugLogging -bool true
+    ///   defaults write com.quentinved.MixBar debugLogging -bool true
     static let isEnabled: Bool =
         UserDefaults.standard.bool(forKey: "debugLogging")
         || ProcessInfo.processInfo.environment["MIXBAR_DEBUG"] == "1"
@@ -12,7 +12,7 @@ enum DebugLog {
     static let url = URL(fileURLWithPath: NSHomeDirectory())
         .appendingPathComponent("Library/Logs/MixBar.log")
 
-    private static let queue = DispatchQueue(label: "com.quentinvedrenne.MixBar.log")
+    private static let queue = DispatchQueue(label: "com.quentinved.MixBar.log")
     private static let formatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm:ss.SSS"

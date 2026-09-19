@@ -9,12 +9,12 @@
 A slider for every app that's making noise, in the menu bar, plus quick
 output-device switching. Free and open source.
 
-[![Tests](https://github.com/quentinvedrenne/mixbar/actions/workflows/test.yml/badge.svg)](https://github.com/quentinvedrenne/mixbar/actions/workflows/test.yml)
-[![Latest release](https://img.shields.io/github/v/release/quentinvedrenne/mixbar?color=6B5CF2)](https://github.com/quentinvedrenne/mixbar/releases/latest)
-[![macOS 15+](https://img.shields.io/badge/macOS-15%2B-6B5CF2)](https://github.com/quentinvedrenne/mixbar/releases/latest)
+[![Tests](https://github.com/quentinved/mixbar/actions/workflows/test.yml/badge.svg)](https://github.com/quentinved/mixbar/actions/workflows/test.yml)
+[![Latest release](https://img.shields.io/github/v/release/quentinved/mixbar?color=6B5CF2)](https://github.com/quentinved/mixbar/releases/latest)
+[![macOS 15+](https://img.shields.io/badge/macOS-15%2B-6B5CF2)](https://github.com/quentinved/mixbar/releases/latest)
 [![MIT licence](https://img.shields.io/badge/licence-MIT-9E3DE3)](LICENSE)
 
-[Download](https://github.com/quentinvedrenne/mixbar/releases/latest) ·
+[Download](https://github.com/quentinved/mixbar/releases/latest) ·
 [Website](https://mixbar.app) ·
 [Contributing](CONTRIBUTING.md) ·
 [Security](SECURITY.md)
@@ -146,7 +146,7 @@ Xcode project file. You need Xcode 16 or later (for the macOS 15 SDK) and
 macOS 15 to run it.
 
 ```sh
-git clone https://github.com/quentinvedrenne/mixbar.git
+git clone https://github.com/quentinved/mixbar.git
 cd mixbar/app
 swift test                  # 33 tests, no audio hardware needed
 ./build.sh                  # -> build/MixBar.app
@@ -184,7 +184,7 @@ teardown and leaves them orphaned in the audio path. If that happens,
 discards stderr, so there is a file log instead:
 
 ```sh
-defaults write com.quentinvedrenne.MixBar debugLogging -bool true
+defaults write com.quentinved.MixBar debugLogging -bool true
 tail -f ~/Library/Logs/MixBar.log
 # or, for one run:  MIXBAR_DEBUG=1 build/MixBar.app/Contents/MacOS/MixBar
 ```

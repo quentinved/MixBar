@@ -39,7 +39,7 @@ case "$SIGN_IDENTITY" in
 esac
 
 codesign --force --sign "$SIGN_IDENTITY" \
-    --identifier com.quentinvedrenne.MixBar \
+    --identifier com.quentinved.MixBar \
     --options runtime \
     "${TIMESTAMP[@]}" "$APP"
 codesign --verify --verbose=1 "$APP"

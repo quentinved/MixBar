@@ -60,7 +60,7 @@ else
     pkgbuild --quiet \
         --component "$APP" \
         --install-location /Applications \
-        --identifier com.quentinvedrenne.MixBar \
+        --identifier com.quentinved.MixBar \
         --version "$VERSION" \
         "$COMPONENT"
     if [ -n "$INSTALLER_IDENTITY" ]; then
@@ -91,7 +91,7 @@ cask "mixbar" do
   app "MixBar.app"
 
   zap trash: [
-    "~/Library/Preferences/com.quentinvedrenne.MixBar.plist",
+    "~/Library/Preferences/com.quentinved.MixBar.plist",
     "~/Library/Logs/MixBar.log",
   ]
 end

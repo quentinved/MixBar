@@ -5,7 +5,7 @@
 	<key>CFBundleExecutable</key>
 	<string>audiotap-spike</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.quentinvedrenne.soundsmanager.spike</string>
+	<string>com.quentinved.soundsmanager.spike</string>
 	<key>CFBundleName</key>
 	<string>audiotap-spike</string>
 	<key>CFBundlePackageType</key>

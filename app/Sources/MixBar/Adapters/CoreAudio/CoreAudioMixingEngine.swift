@@ -13,7 +13,7 @@ final class CoreAudioMixingEngine: AudioMixingEngine {
     private var ioProcID: AudioDeviceIOProcID?
 
     /// coreaudiod IPC: ~1.8s, and blocks on the first-run permission prompt.
-    private let work = DispatchQueue(label: "com.quentinvedrenne.MixBar.engine")
+    private let work = DispatchQueue(label: "com.quentinved.MixBar.engine")
 
     private let state = NSLock()
     private var routed: [AudioAppID] = []
