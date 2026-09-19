@@ -1,20 +1,38 @@
-name: Deploy site
+name: Site
 
 # The landing page in site/ is plain static files, so this only runs when they
-# change. Until the repository variable CLOUDFLARE_PROJECT is set, the job skips
-# cleanly rather than failing — the site can also be deployed straight from
-# Cloudflare's dashboard via the Git integration, with no secrets in GitHub.
+# change. Cloudflare Pages deploys the site from its own Git integration, which
+# does not wait for this check — so `check` is what tells you a push broke the
+# page, not what stops it. The deploy job stays as a fallback and skips entirely
+# unless the repository variable CLOUDFLARE_PROJECT is set.
 on:
   push:
     branches: [main]
     paths:
       - "site/**"
+      - "tools/check-site.sh"
+      - ".github/workflows/site.yml"
+  pull_request:
+    paths:
+      - "site/**"
+      - "tools/check-site.sh"
       - ".github/workflows/site.yml"
   workflow_dispatch:
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The page has no build step, so nothing else would catch a missing asset,
+      # a dead link, or markup the CSP drops on the floor.
+      - name: Check site
+        run: ./tools/check-site.sh
+
   deploy:
-    if: vars.CLOUDFLARE_PROJECT != ''
+    needs: check
+    if: github.event_name != 'pull_request' && vars.CLOUDFLARE_PROJECT != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
