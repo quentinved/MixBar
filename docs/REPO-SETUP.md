@@ -10,7 +10,7 @@ public. Ordered so that nothing is public before it is safe to be.
       and `git log --all --name-only | grep -E '\.p8|\.p12'` (should be empty).
       These are your Developer ID private key and App Store Connect key — if
       either has ever been committed, revoke it rather than deleting the commit.
-- [x] `CODE_OF_CONDUCT.md` lists **contact@quentinved.com** as the conduct
+- [x] `CODE_OF_CONDUCT.md` lists **contact@quentinvedrenne.com** as the conduct
       contact. Confirm that mailbox is monitored — it is on a public page and
       will be scraped, so a filter for it is worth setting up.
 - [x] Repository name: **`MixBar`**, under `quentinved`. Every URL in this repo
