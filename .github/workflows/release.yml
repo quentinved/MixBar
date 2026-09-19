@@ -15,15 +15,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Pick the newest Xcode the runner actually has, rather than pinning a
-      # version that may not be installed on the image.
       - name: Select Xcode
+        run: tools/select-xcode.sh
+
+      # The artifacts and the cask take their version from Info.plist; the
+      # release takes its name from the tag. Nothing connects the two, so a tag
+      # that disagrees ships MixBar-<old>.dmg under v<new>, and a cask whose
+      # download URL is a 404 for every user who runs brew install.
+      - name: Check the tag against the app version
+        if: startsWith(github.ref, 'refs/tags/v')
         run: |
           set -euo pipefail
-          XCODE="$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
-          echo "using $XCODE"
-          sudo xcode-select -s "$XCODE"
-          swift --version
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION="$(plutil -extract CFBundleShortVersionString raw app/Info.plist)"
+          if [ "$TAG" != "$VERSION" ]; then
+              echo "tag $GITHUB_REF_NAME, but app/Info.plist says $VERSION" >&2
+              echo "bump CFBundleShortVersionString to $TAG, commit, then retag" >&2
+              exit 1
+          fi
+          echo "releasing $VERSION"
 
       - name: Run tests
         working-directory: app
