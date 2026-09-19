@@ -13,7 +13,7 @@ final class CoreAudioMixingEngine: AudioMixingEngine {
     private var ioProcID: AudioDeviceIOProcID?
 
     /// coreaudiod IPC: ~1.8s, and blocks on the first-run permission prompt.
-    private let work = DispatchQueue(label: "com.quentinvedrenne.MixBar.engine")
+    private let work = DispatchQueue(label: "com.quentinved.MixBar.engine")
 
     private let state = NSLock()
     private var routed: [AudioAppID] = []
@@ -222,7 +222,7 @@ final class CoreAudioMixingEngine: AudioMixingEngine {
 
         var procID: AudioDeviceIOProcID?
         let status = AudioDeviceCreateIOProcIDWithBlock(&procID, aggregate.id, nil, render)
-        guard status == noErr, let procID else { throw AudioHardwareError(status) }
+        guard status == noErr, let procID else { throw MixerEngineError.renderNotStarted(status) }
         ioProcID = procID
         try aggregate.start(IOProcID: procID)
     }
@@ -251,11 +251,17 @@ enum MixerEngineError: Error, CustomStringConvertible {
     case aggregateNotCreated
     case noOutput
 
+    /// AudioHardwareError only became constructible in the macOS 26 SDK, and
+    /// this has to build on the Xcode 16 the README asks for.
+    case renderNotStarted(OSStatus)
+
     var description: String {
         switch self {
         case .tapNotCreated: return "Could not create an audio tap."
         case .aggregateNotCreated: return "Could not create the mixing device."
         case .noOutput: return "No default output device."
+        case .renderNotStarted(let status):
+            return "Could not start the mixer (status \(status))."
         }
     }
 }

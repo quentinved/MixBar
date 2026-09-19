@@ -106,8 +106,22 @@ final class MixerViewModel: ObservableObject {
         if let url { NSWorkspace.shared.open(url) }
     }
 
+    /// The bundle fallback matters when the process is gone but the row is
+    /// still listed, which is every row under --demo and any app with a
+    /// remembered volume that has since quit.
     func icon(for application: AudioApplication) -> NSImage? {
-        NSRunningApplication(processIdentifier: application.processIdentifier)?.icon
+        if let running = NSRunningApplication(
+            processIdentifier: application.processIdentifier)?.icon {
+            return running
+        }
+        guard let bundleID = application.bundleID,
+              let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID)
+        else { return nil }
+        let icon = NSWorkspace.shared.icon(forFile: url.path)
+        // Defaults to 32pt, which AppKit then hands over as the best match for
+        // a 26pt row and SwiftUI scales up into mush on a Retina screen.
+        icon.size = NSSize(width: 128, height: 128)
+        return icon
     }
 
     private func reload() {

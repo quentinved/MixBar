@@ -13,8 +13,10 @@ public. Ordered so that nothing is public before it is safe to be.
 - [x] `CODE_OF_CONDUCT.md` lists **contact@quentinvedrenne.com** as the conduct
       contact. Confirm that mailbox is monitored — it is on a public page and
       will be scraped, so a filter for it is worth setting up.
-- [ ] Decide the repository name: **`mixbar`**. Every URL in this repo assumes
-      `github.com/quentinvedrenne/mixbar`.
+- [x] Repository name: **`MixBar`**, under `quentinved`. Every URL in this repo
+      assumes `github.com/quentinved/MixBar`; `tools/check-site.sh` fails if the
+      landing page ever points somewhere that 404s, so a later rename is caught
+      rather than shipped.
 
 ## 1. About panel
 
@@ -127,26 +129,38 @@ gives a visitor nothing to do.
 
 ## 7. Cloudflare Pages
 
-The simplest route needs no GitHub secrets at all:
+Deployed from Cloudflare's own Git integration, which needs no GitHub secrets:
 
 1. Cloudflare dashboard → **Workers & Pages** → Create → **Pages** → Connect to Git.
-2. Pick the `mixbar` repository.
+2. Authorise GitHub and pick the `MixBar` repository.
 3. Build settings: **Framework preset** None, **Build command** empty,
-   **Build output directory** `site`.
-4. Deploy. Every push to `main` republishes, and every PR gets a preview URL.
+   **Build output directory** `site`. Leave the root directory alone.
+4. Deploy. You land on `mixbar.pages.dev`, and every PR gets a preview URL.
+5. Settings → **Builds & deployments** → **Build watch paths** → set *Include
+   paths* to `site/*`. Without this a Swift-only commit still triggers a rebuild
+   and a new deployment, which makes the deployment list useless for working out
+   when the page last actually changed.
 
 `site/_redirects` then makes `/download` always point at the newest GitHub
 release, so the download button never needs touching on a version bump.
 `site/_headers` sets the CSP and cache policy.
 
+**Cloudflare does not wait for GitHub Actions.** A push to `main` deploys whether
+or not the `check` job in `site.yml` passed, so that job reports rather than
+gates. The gate is §5's branch protection: require the `check` status on pull
+requests and merge only through them, and `main` is never broken in the first
+place.
+
 **Custom domain:** Pages project → Custom domains → add `mixbar.app`. If the
 domain is registered with Cloudflare the records are created for you; otherwise
-add the `CNAME` they display. Then update `og:url`, `canonical` and the About
-panel's Website field.
+add the `CNAME` they display. Until then the page's `canonical`, `og:url` and
+`og:image` all hard-code `https://mixbar.app/`, so launching on `*.pages.dev`
+first means changing those three or shipping dead link previews. Then update the
+About panel's Website field.
 
-If you would rather deploy from CI, set the three Cloudflare entries in the
-table above and `.github/workflows/site.yml` takes over — but the Git
-integration is fewer moving parts and gives PR previews for free.
+If you would rather deploy from CI instead, set the three Cloudflare entries in
+the table above and the `deploy` job in `.github/workflows/site.yml` takes over —
+it gates on `check`, but you lose PR previews.
 
 ## 8. Release
 
@@ -158,7 +172,7 @@ git tag v0.2 && git push origin v0.2
 the release, and prints the Homebrew cask. Nothing else to do by hand.
 
 A Homebrew cask needs somewhere to live before `brew install --cask mixbar`
-works: either a personal tap (`quentinvedrenne/homebrew-tap`) or a PR to
+works: either a personal tap (`quentinved/homebrew-tap`) or a PR to
 `homebrew/homebrew-cask`, which requires the app to be notarized and reasonably
 established. Until one exists, **do not advertise the brew command anywhere** —
 the download link is the only install path that works today.

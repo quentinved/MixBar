@@ -72,7 +72,7 @@ body:
         `~/Library/Logs/MixBar.log`:
 
         ```sh
-        defaults write com.quentinvedrenne.MixBar debugLogging -bool true
+        defaults write com.quentinved.MixBar debugLogging -bool true
         ```
 
         The log contains device and process names. It never contains audio.

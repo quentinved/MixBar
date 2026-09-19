@@ -5,7 +5,7 @@
 **Please do not open a public issue for a security problem.**
 
 Report it privately through GitHub:
-[**Report a vulnerability**](https://github.com/quentinvedrenne/mixbar/security/advisories/new).
+[**Report a vulnerability**](https://github.com/quentinved/MixBar/security/advisories/new).
 That opens a private advisory only you and the maintainers can see.
 
 You can expect an acknowledgement within 72 hours and an assessment within a

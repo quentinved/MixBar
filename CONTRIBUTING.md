@@ -7,8 +7,8 @@ is hard to review however good the idea is.
 ## Getting set up
 
 ```sh
-git clone https://github.com/quentinvedrenne/mixbar
-cd mixbar/app
+git clone https://github.com/quentinved/MixBar
+cd MixBar/app
 swift test        # 33 tests, no audio hardware and no permissions needed
 ./build.sh        # -> build/MixBar.app
 ```

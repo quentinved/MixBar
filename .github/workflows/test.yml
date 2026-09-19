@@ -11,15 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Pick the newest Xcode the runner actually has, rather than pinning a
-      # version that may not be installed on the image.
       - name: Select Xcode
-        run: |
-          set -euo pipefail
-          XCODE="$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
-          echo "using $XCODE"
-          sudo xcode-select -s "$XCODE"
-          swift --version
+        run: tools/select-xcode.sh
 
       # The core imports no frameworks and every port has a fake, so the whole
       # rule set runs on a CI box with no audio device and no permissions.

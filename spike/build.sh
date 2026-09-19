@@ -29,7 +29,7 @@ cp Info.plist "$APP/Contents/Info.plist"
 cp "$BIN" "$APP/Contents/MacOS/audiotap-spike"
 
 codesign --force --sign "$SIGN_IDENTITY" \
-    --identifier com.quentinvedrenne.soundsmanager.spike "$APP"
+    --identifier com.quentinved.soundsmanager.spike "$APP"
 
 echo "built: $APP"
 echo

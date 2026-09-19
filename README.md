@@ -9,15 +9,23 @@
 A slider for every app that's making noise, in the menu bar, plus quick
 output-device switching. Free and open source.
 
-[![Tests](https://github.com/quentinvedrenne/mixbar/actions/workflows/test.yml/badge.svg)](https://github.com/quentinvedrenne/mixbar/actions/workflows/test.yml)
-[![Latest release](https://img.shields.io/github/v/release/quentinvedrenne/mixbar?color=6B5CF2)](https://github.com/quentinvedrenne/mixbar/releases/latest)
-[![macOS 15+](https://img.shields.io/badge/macOS-15%2B-6B5CF2)](https://github.com/quentinvedrenne/mixbar/releases/latest)
+[![Tests](https://github.com/quentinved/MixBar/actions/workflows/test.yml/badge.svg)](https://github.com/quentinved/MixBar/actions/workflows/test.yml)
+[![Latest release](https://img.shields.io/github/v/release/quentinved/MixBar?color=6B5CF2)](https://github.com/quentinved/MixBar/releases/latest)
+[![macOS 15+](https://img.shields.io/badge/macOS-15%2B-6B5CF2)](https://github.com/quentinved/MixBar/releases/latest)
 [![MIT licence](https://img.shields.io/badge/licence-MIT-9E3DE3)](LICENSE)
 
-[Download](https://github.com/quentinvedrenne/mixbar/releases/latest) ·
+[Download](https://github.com/quentinved/MixBar/releases/latest) ·
 [Website](https://mixbar.app) ·
 [Contributing](CONTRIBUTING.md) ·
 [Security](SECURITY.md)
+
+<br>
+
+<picture>
+  <source srcset="site/shots/comfortable-dark.png" media="(prefers-color-scheme: dark)">
+  <img src="site/shots/comfortable.png" width="320"
+       alt="The MixBar popover: a volume slider for each app that is playing.">
+</picture>
 
 </div>
 
@@ -146,8 +154,8 @@ Xcode project file. You need Xcode 16 or later (for the macOS 15 SDK) and
 macOS 15 to run it.
 
 ```sh
-git clone https://github.com/quentinvedrenne/mixbar.git
-cd mixbar/app
+git clone https://github.com/quentinved/MixBar.git
+cd MixBar/app
 swift test                  # 33 tests, no audio hardware needed
 ./build.sh                  # -> build/MixBar.app
 open ../build/MixBar.app
@@ -173,6 +181,29 @@ permission each time. Pass a real certificate to make the grant stick:
 SIGN_IDENTITY="Apple Development: Your Name (XXXXXXXXXX)" ./build.sh
 ```
 
+### Demo mode and the screenshots
+
+`--demo` replaces every driven port with a scripted one, so the app runs with no
+audio device, no permission grant and nothing playing — a fixed roster of apps,
+with meters driven by the clock:
+
+```sh
+open build/MixBar.app --args --demo
+```
+
+The screenshots in `site/shots/` are that same demo, posed and photographed:
+
+```sh
+./app/build.sh && ./tools/screenshot.sh
+```
+
+It captures every layout in light and dark. The app opens each pose in a window
+of its own and prints the window id, which is what `screencapture` takes — so
+nothing depends on clicking the status item, which no script can do without the
+Accessibility grant. **Screen Recording must be granted to the terminal** you
+run it from. Regenerate whenever the interface changes; the page and the README
+both read from that one directory.
+
 Quit from the menu (`…` → **Quit**), never with `kill -9`. Taps and aggregate
 devices registered with `coreaudiod` outlive the process; `SIGKILL` skips
 teardown and leaves them orphaned in the audio path. If that happens,
@@ -184,7 +215,7 @@ teardown and leaves them orphaned in the audio path. If that happens,
 discards stderr, so there is a file log instead:
 
 ```sh
-defaults write com.quentinvedrenne.MixBar debugLogging -bool true
+defaults write com.quentinved.MixBar debugLogging -bool true
 tail -f ~/Library/Logs/MixBar.log
 # or, for one run:  MIXBAR_DEBUG=1 build/MixBar.app/Contents/MacOS/MixBar
 ```
