@@ -11,13 +11,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Pick the newest Xcode the runner actually has, rather than pinning a
-      # version that may not be installed on the image.
+      # The newest Xcode on the image builds against an SDK newer than the
+      # runner's macOS, and the test bundle then fails to dlopen: the CoreAudio
+      # overlay it links resolves against /usr/lib/swift, which is the older OS
+      # copy. Take the newest Xcode whose SDK is not ahead of the OS instead.
       - name: Select Xcode
         run: |
           set -euo pipefail
-          XCODE="$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
-          echo "using $XCODE"
+          OS_MAJOR="$(sw_vers -productVersion | cut -d. -f1)"
+          for CANDIDATE in $(ls -d /Applications/Xcode*.app | sort -Vr); do
+              SDK="$(DEVELOPER_DIR="$CANDIDATE/Contents/Developer" \
+                  xcrun --sdk macosx --show-sdk-version 2>/dev/null)" || continue
+              if [ "${SDK%%.*}" -le "$OS_MAJOR" ]; then XCODE="$CANDIDATE"; break; fi
+          done
+          [ -n "${XCODE:-}" ] || { echo "no Xcode with an SDK <= macOS $OS_MAJOR" >&2; exit 1; }
+          echo "macOS $OS_MAJOR, using $XCODE (SDK $SDK)"
           sudo xcode-select -s "$XCODE"
           swift --version
 
