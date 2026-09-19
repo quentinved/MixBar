@@ -71,9 +71,15 @@ echo "External links"
 # A renamed repository or a moved page leaves a dead link nothing else would notice.
 for url in $(grep -oE '<a [^>]*href="https://[^"]+' "$HTML" \
               | grep -oE 'https://[^"]+' | sort -u); do
-    code="$(curl -sS -o /dev/null -w '%{http_code}' -L --max-time 20 "$url" || echo 000)"
+    code="$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 20 "$url")"
+    # curl already reports 000 when it cannot connect. Once is the network
+    # having a moment; twice is a domain that is not there.
+    if [ "$code" = "000" ]; then
+        sleep 2
+        code="$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 20 "$url")"
+    fi
     case "$code" in
-        200|429|5??|000) pass "$code $url" ;;
+        200|429|5??) pass "$code $url" ;;
         *) fail "$code $url" ;;
     esac
 done
