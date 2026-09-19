@@ -1,0 +1,96 @@
+/* Every animation on the page; styles.css holds the resting state, so deleting
+   this file leaves a correct page. The rules nest deeply to keep that true: an
+   `opacity: 0` must reach neither someone who asked for stillness nor a browser
+   that cannot scrub it back to 1. */
+
+:root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes rise-mark {
+  from { opacity: 0; transform: translateY(10px) scale(0.94); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes sheen {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+@keyframes stage-drift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(9px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes fill-in { from { width: 0; } }
+@keyframes knob-in { from { left: 0; } }
+@keyframes scrubbed { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* Stepped and uneven: a smooth ease reads as a progress bar, not as sound. */
+@keyframes meter {
+  0%   { width: 34%; }  9%   { width: 71%; }  18%  { width: 52%; }
+  27%  { width: 88%; }  36%  { width: 43%; }  45%  { width: 66%; }
+  54%  { width: 29%; }  63%  { width: 79%; }  72%  { width: 48%; }
+  81%  { width: 61%; }  90%  { width: 37%; }  100% { width: 55%; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+
+  /* --- hero, on load --- */
+  .hero__mark   { animation: rise-mark 0.7s var(--ease-out) 0.05s backwards; }
+  .hero__name   { animation: rise 0.7s var(--ease-out) 0.13s backwards; }
+  .hero__tagline {
+    background-size: 260% 100%;
+    animation: rise 0.7s var(--ease-out) 0.21s backwards, sheen 9s var(--ease-soft) 1s infinite;
+  }
+  .hero__sub    { animation: rise 0.7s var(--ease-out) 0.29s backwards; }
+  .hero .cta    { animation: rise 0.7s var(--ease-out) 0.37s backwards; }
+  .hero__meta   { animation: rise 0.7s var(--ease-out) 0.45s backwards; }
+
+  .button { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .layouts img { transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out); }
+  .layouts figure:hover img { transform: translateY(-6px); box-shadow: 0 26px 46px -20px rgba(20, 16, 31, 0.6); }
+
+  /* --- the popover, on load --- */
+  .shot__stage { animation: stage-drift 22s ease-in-out infinite; }
+  .mix__row  { animation: row-in 0.5s var(--ease-out) var(--in) backwards; }
+  .mix__fill { animation: fill-in 1.05s var(--ease-out) var(--in) backwards; }
+  .mix__knob { animation: knob-in 1.05s var(--ease-out) var(--in) backwards; }
+  .mix__meter { animation: meter 2.6s steps(1, end) var(--in) infinite; }
+
+  /* Each meter on its own clock, or six rows pulse as one bar. */
+  .mix__row--discord .mix__meter { animation-duration: 3.1s; }
+  .mix__row--music   .mix__meter { animation-duration: 2.3s; }
+  .mix__row--spotify .mix__meter { animation-duration: 3.7s; }
+  .mix__row--vlc     .mix__meter { animation-duration: 2.9s; }
+
+  /* --- on scroll --- */
+  /* `duration: auto` is load-bearing: the shorthand resets it to 0s, and any
+     fixed duration pins a scrubbed animation to its first frame — opacity: 0,
+     so the section never appears at all. */
+  @supports (animation-timeline: view()) {
+    /* A reveal inside a revealing parent multiplies the two opacities and
+       smears, so the screenshots opt their section out and stagger themselves. */
+    .section:not(:has(.layouts)), .footer,
+    .section:has(.layouts) > h2, .section:has(.layouts) > .lede,
+    .layouts figure {
+      animation: rise linear both;
+      animation-duration: auto;
+      animation-timeline: view();
+      animation-range: entry 6% cover 30%;
+    }
+
+    .progress {
+      transform-origin: 0 50%;
+      animation: scrubbed linear both;
+      animation-duration: auto;
+      animation-timeline: scroll(root block);
+    }
+  }
+}

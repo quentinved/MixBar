@@ -27,6 +27,16 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* Driven by motion.css; with no scroll timeline it stays at zero width. */
+.progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 3px;
+  z-index: 10;
+  background: var(--brand);
+  transform: scaleX(0);
+}
+
 body {
   margin: 0;
   padding: 0 24px;
@@ -82,7 +92,6 @@ h1, h2, h3 { letter-spacing: -0.025em; line-height: 1.15; }
   font-size: 1rem;
   color: var(--ink);
   text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 .button--primary {
   border-color: transparent;
@@ -106,61 +115,145 @@ h1, h2, h3 { letter-spacing: -0.025em; line-height: 1.15; }
   white-space: nowrap;
 }
 
-/* --- interface illustration --- */
-.shot { max-width: 30rem; margin: 8px auto 96px; }
-.window {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  box-shadow: 0 24px 60px -24px rgba(20, 16, 31, 0.35);
-}
-.window__head {
+/* --- hero panel --- */
+/* A stand-in for the popover, so the sliders can sweep; the CSP forbids the
+   style="" attributes these custom properties replace. */
+.shot { max-width: 44rem; margin: 8px auto 96px; }
+.shot__stage {
   display: flex;
-  justify-content: space-between;
-  font-size: 0.8125rem;
-  color: var(--muted);
-  padding: 2px 6px 12px;
-  border-bottom: 1px solid var(--border);
+  justify-content: center;
+  padding: 52px 24px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--brand-indigo), var(--brand-violet), var(--brand-indigo));
+  background-size: 220% 220%;
 }
-.window__device { color: var(--ink); font-weight: 500; }
-.rows { list-style: none; margin: 0; padding: 8px 0 0; }
-.row {
+
+.panel {
+  width: 340px;
+  max-width: 100%;
+  padding: 16px 18px 20px;
+  border-radius: 14px;
+  background: #242329;
+  box-shadow: 0 30px 64px -22px rgba(9, 6, 18, 0.7);
+  color: #F2EFF8;
+  text-align: left;
+}
+.panel__head { padding-bottom: 12px; border-bottom: 1px solid #36343E; }
+.panel__title { display: block; font-size: 1.0625rem; font-weight: 600; }
+.panel__device {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.8125rem;
+  color: #9B96AD;
+}
+
+.mix { list-style: none; margin: 0; padding: 12px 0 0; }
+.mix__row {
   display: grid;
-  grid-template-columns: 22px 5.5rem 1fr 2.75rem;
+  grid-template-columns: 30px 1fr auto;
+  grid-template-areas: "icon name pct" "icon track track";
   align-items: center;
-  gap: 12px;
-  padding: 9px 6px;
+  column-gap: 11px;
+  row-gap: 7px;
+  padding: 7px 0;
   font-size: 0.875rem;
 }
-.row__icon {
-  width: 22px; height: 22px; border-radius: 6px;
+.mix__icon {
+  grid-area: icon;
+  width: 30px; height: 30px;
+  border-radius: 8px;
   background: linear-gradient(140deg, var(--a), var(--b));
 }
-.row__name { font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.row__track {
+.mix__name { grid-area: name; font-weight: 500; }
+.mix__pct { grid-area: pct; font-variant-numeric: tabular-nums; color: #9B96AD; font-size: 0.8125rem; }
+.mix__track {
+  grid-area: track;
   position: relative;
-  height: 4px;
-  border-radius: 2px;
-  background: var(--border);
+  height: 5px;
+  border-radius: 3px;
+  background: #4A4753;
 }
-.row__fill { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: var(--brand); }
-.row__knob {
+.mix__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--level);
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--brand-indigo), var(--brand-violet));
+}
+/* The pale head is the live meter; nesting it in the fill is what stops it
+   running past the knob. */
+.mix__meter {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 22%;
+  border-radius: 3px;
+  background: #DCCFF6;
+  opacity: 0.85;
+}
+.mix__knob {
   position: absolute;
   top: 50%;
-  width: 13px; height: 13px;
-  margin-left: -6.5px;
+  left: var(--level);
+  width: 14px; height: 14px;
+  margin-left: -7px;
   border-radius: 50%;
   background: #fff;
   transform: translateY(-50%);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.32);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
 }
-.row__value { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 0.8125rem; }
-.row--muted .row__name, .row--muted .row__icon { opacity: 0.5; }
+
+.mix__row--arc     { --a: #E8C7D8; --b: #A9B6E8; --level: 100%; --in: 0.10s; }
+.mix__row--discord { --a: #5865F2; --b: #3C46B8; --level: 34%;  --in: 0.18s; }
+.mix__row--teams   { --a: #6264A7; --b: #4B4D82; --level: 0%;   --in: 0.26s; }
+.mix__row--music   { --a: #FB5C74; --b: #E8112D; --level: 78%;  --in: 0.34s; }
+.mix__row--spotify { --a: #1DB954; --b: #12833C; --level: 62%;  --in: 0.42s; }
+.mix__row--vlc     { --a: #F58220; --b: #E85D04; --level: 88%;  --in: 0.50s; }
+
+.mix__row--teams .mix__name,
+.mix__row--teams .mix__icon { opacity: 0.45; }
+.mix__row--teams .mix__meter { display: none; }
+.mix__row--teams .mix__knob { background: #8C8896; }
+
+/* --- screenshots --- */
+/* Regenerated by tools/screenshot.sh, captured at 2x, so each image is declared
+   at half its pixel size and the browser gets a Retina asset for free. */
+.layouts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 30px;
+  align-items: end;
+  margin-top: 30px;
+}
+.layouts figure {
+  margin: 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+/* Bounded by height, not width: the three layouts have very different aspect
+   ratios, and equal columns would make the tallest one look like the point. */
+.layouts img {
+  max-width: 100%;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  box-shadow: 0 18px 38px -20px rgba(20, 16, 31, 0.5);
+}
+.layouts figcaption {
+  margin-top: 14px;
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+.layouts figcaption strong { color: var(--ink); font-weight: 600; }
 
 /* --- prose sections --- */
 .section { max-width: var(--measure); margin: 0 auto 88px; }
 .section h2 { font-size: 1.625rem; margin: 0 0 16px; }
+.section--wide { max-width: 52rem; }
 .section p { margin: 0 0 16px; color: var(--muted); }
 .section .lede { color: var(--ink); font-size: 1.0625rem; }
 .section--flag {
@@ -209,16 +302,12 @@ h1, h2, h3 { letter-spacing: -0.025em; line-height: 1.15; }
   color: var(--muted);
 }
 .footer p { margin: 0 0 8px; }
+.footer__made { font-weight: 500; color: var(--ink); }
 .footer__fine { font-size: 0.8125rem; opacity: 0.8; }
 
 @media (max-width: 30rem) {
   .hero { padding-top: 60px; }
   .status { grid-template-columns: 1fr; gap: 20px; }
-  .row { grid-template-columns: 22px 4.5rem 1fr 2.5rem; gap: 9px; }
   .section--flag { padding: 24px 22px 10px; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .button { transition: none; }
-  .button:hover { transform: none; }
-}

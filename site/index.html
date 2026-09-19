@@ -25,8 +25,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/motion.css">
 </head>
 <body>
+<div class="progress" aria-hidden="true"></div>
 
 <header class="hero">
   <img class="hero__mark" src="/mark.svg" width="104" height="104" alt="">
@@ -41,7 +43,7 @@
     <a class="button button--primary" href="/download">
       Download for macOS
     </a>
-    <a class="button" href="https://github.com/quentinvedrenne/mixbar">View the source</a>
+    <a class="button" href="https://github.com/quentinved/MixBar">View the source</a>
   </div>
 
   <p class="hero__meta">
@@ -51,40 +53,73 @@
 
 <main>
 
-  <!-- TODO: replace with a real screenshot of the popover before launch.
-       This is an illustration of the interface, not a capture of it. -->
-  <section class="shot" aria-label="What MixBar looks like">
-    <div class="window">
-      <div class="window__head">
-        <span class="window__title">Output</span>
-        <span class="window__device">MacBook Pro Speakers ▾</span>
+  <!-- A living stand-in for the popover, not a capture of it: the real thing is
+       in "Three ways to see it" below. Pure CSS — the CSP allows no scripts. -->
+  <section class="shot">
+    <div class="shot__stage">
+      <div class="panel" role="img"
+           aria-label="The MixBar popover, open: a volume slider for Arc, Discord, Microsoft Teams, Music, Spotify and VLC, each with a live level meter, and the output device named at the top.">
+        <div class="panel__head">
+          <span class="panel__title">MixBar</span>
+          <span class="panel__device">MacBook Pro Speakers</span>
+        </div>
+        <ul class="mix">
+        <li class="mix__row mix__row--arc">
+          <span class="mix__icon"></span>
+          <span class="mix__name">Arc</span>
+          <span class="mix__pct">100%</span>
+          <span class="mix__track">
+            <span class="mix__fill"><span class="mix__meter"></span></span>
+            <span class="mix__knob"></span>
+          </span>
+        </li>
+        <li class="mix__row mix__row--discord">
+          <span class="mix__icon"></span>
+          <span class="mix__name">Discord</span>
+          <span class="mix__pct">34%</span>
+          <span class="mix__track">
+            <span class="mix__fill"><span class="mix__meter"></span></span>
+            <span class="mix__knob"></span>
+          </span>
+        </li>
+        <li class="mix__row mix__row--teams">
+          <span class="mix__icon"></span>
+          <span class="mix__name">Microsoft Teams</span>
+          <span class="mix__pct">0%</span>
+          <span class="mix__track">
+            <span class="mix__fill"><span class="mix__meter"></span></span>
+            <span class="mix__knob"></span>
+          </span>
+        </li>
+        <li class="mix__row mix__row--music">
+          <span class="mix__icon"></span>
+          <span class="mix__name">Music</span>
+          <span class="mix__pct">78%</span>
+          <span class="mix__track">
+            <span class="mix__fill"><span class="mix__meter"></span></span>
+            <span class="mix__knob"></span>
+          </span>
+        </li>
+        <li class="mix__row mix__row--spotify">
+          <span class="mix__icon"></span>
+          <span class="mix__name">Spotify</span>
+          <span class="mix__pct">62%</span>
+          <span class="mix__track">
+            <span class="mix__fill"><span class="mix__meter"></span></span>
+            <span class="mix__knob"></span>
+          </span>
+        </li>
+        <li class="mix__row mix__row--vlc">
+          <span class="mix__icon"></span>
+          <span class="mix__name">VLC</span>
+          <span class="mix__pct">88%</span>
+          <span class="mix__track">
+            <span class="mix__fill"><span class="mix__meter"></span></span>
+            <span class="mix__knob"></span>
+          </span>
+        </li>
+        </ul>
       </div>
-      <ul class="rows">
-        <li class="row">
-          <span class="row__icon" style="--a:#1DB954;--b:#12833c"></span>
-          <span class="row__name">Spotify</span>
-          <span class="row__track"><span class="row__fill" style="width:62%"></span><span class="row__knob" style="left:62%"></span></span>
-          <span class="row__value">62</span>
-        </li>
-        <li class="row">
-          <span class="row__icon" style="--a:#f06543;--b:#d4372a"></span>
-          <span class="row__name">Arc</span>
-          <span class="row__track"><span class="row__fill" style="width:100%"></span><span class="row__knob" style="left:100%"></span></span>
-          <span class="row__value">100</span>
-        </li>
-        <li class="row">
-          <span class="row__icon" style="--a:#5865F2;--b:#3c46b8"></span>
-          <span class="row__name">Discord</span>
-          <span class="row__track"><span class="row__fill" style="width:34%"></span><span class="row__knob" style="left:34%"></span></span>
-          <span class="row__value">34</span>
-        </li>
-        <li class="row row--muted">
-          <span class="row__icon" style="--a:#8e8e93;--b:#636366"></span>
-          <span class="row__name">Music</span>
-          <span class="row__track"><span class="row__fill" style="width:0%"></span><span class="row__knob" style="left:0%"></span></span>
-          <span class="row__value">Muted</span>
-        </li>
-      </ul>
     </div>
   </section>
 
@@ -104,6 +139,40 @@
     </p>
   </section>
 
+  <section class="section section--wide">
+    <h2>Three ways to see it</h2>
+    <p class="lede">
+      The same mixer, at three densities. Two apps or twenty, the panel is meant
+      to be read at a glance and closed again.
+    </p>
+    <div class="layouts">
+      <figure>
+        <picture>
+          <source srcset="/shots/compact-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="/shots/compact.png" width="320" height="294" loading="lazy"
+               alt="The compact layout: one line per app, name and slider on the same row.">
+        </picture>
+        <figcaption><strong>Compact</strong> — one line per app.</figcaption>
+      </figure>
+      <figure>
+        <picture>
+          <source srcset="/shots/comfortable-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="/shots/comfortable.png" width="320" height="453" loading="lazy"
+               alt="The comfortable layout: each app gets an icon, its name and a full-width slider.">
+        </picture>
+        <figcaption><strong>Comfortable</strong> — icon, name, full slider.</figcaption>
+      </figure>
+      <figure>
+        <picture>
+          <source srcset="/shots/mixer-dark.png" media="(prefers-color-scheme: dark)">
+          <img src="/shots/mixer.png" width="458" height="300" loading="lazy"
+               alt="The mixer layout: vertical faders side by side, like a mixing desk.">
+        </picture>
+        <figcaption><strong>Mixer</strong> — vertical faders, side by side.</figcaption>
+      </figure>
+    </div>
+  </section>
+
   <section class="section section--flag">
     <h2>Why it asks for microphone permission</h2>
     <p>
@@ -119,7 +188,7 @@
       and writes them to your output device. Nothing is recorded, written to
       disk, or sent anywhere. There is no network code in the app at all. You do
       not have to take that on faith —
-      <a href="https://github.com/quentinvedrenne/mixbar/blob/main/app/Sources/MixBar/Adapters/CoreAudio/RealtimeMixer.swift">read the mixer</a>.
+      <a href="https://github.com/quentinved/MixBar/blob/main/app/Sources/MixBar/Adapters/CoreAudio/RealtimeMixer.swift">read the mixer</a>.
     </p>
   </section>
 
@@ -181,7 +250,7 @@
     </div>
     <p class="note">
       MixBar is pre&#8209;1.0 and the second column is where the
-      <a href="https://github.com/quentinvedrenne/mixbar/blob/main/CONTRIBUTING.md">contributions</a>
+      <a href="https://github.com/quentinved/MixBar/blob/main/CONTRIBUTING.md">contributions</a>
       would help most.
     </p>
   </section>
@@ -190,7 +259,7 @@
     <h2>Get it</h2>
     <div class="cta">
       <a class="button button--primary" href="/download">Download for macOS</a>
-      <a class="button" href="https://github.com/quentinvedrenne/mixbar">View the source</a>
+      <a class="button" href="https://github.com/quentinved/MixBar">View the source</a>
     </div>
   </section>
 
@@ -198,9 +267,12 @@
 
 <footer class="footer">
   <p>
-    <a href="https://github.com/quentinvedrenne/mixbar">GitHub</a> ·
-    <a href="https://github.com/quentinvedrenne/mixbar/releases">Releases</a> ·
-    <a href="https://github.com/quentinvedrenne/mixbar/blob/main/LICENSE">MIT licence</a>
+    <a href="https://github.com/quentinved/MixBar">GitHub</a> ·
+    <a href="https://github.com/quentinved/MixBar/releases">Releases</a> ·
+    <a href="https://github.com/quentinved/MixBar/blob/main/LICENSE">MIT licence</a>
+  </p>
+  <p class="footer__made">
+    Made by <a href="https://quentinved.com" rel="me">Quentin Vedrenne</a>
   </p>
   <p class="footer__fine">
     Not affiliated with Apple. macOS is a trademark of Apple Inc.
