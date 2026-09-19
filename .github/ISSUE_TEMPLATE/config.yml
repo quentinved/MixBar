@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 contact_links:
   - name: Security vulnerability
-    url: https://github.com/quentinvedrenne/mixbar/security/advisories/new
+    url: https://github.com/quentinved/MixBar/security/advisories/new
     about: Report privately, not as a public issue.
   - name: Questions and ideas
-    url: https://github.com/quentinvedrenne/mixbar/discussions
+    url: https://github.com/quentinved/MixBar/discussions
     about: For anything that is not yet a bug or a concrete request.
