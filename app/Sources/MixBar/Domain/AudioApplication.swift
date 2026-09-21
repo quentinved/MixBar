@@ -21,9 +21,3 @@ struct AudioApplication: Identifiable, Equatable, Sendable {
 
     let isPlaying: Bool
 }
-
-/// A destination audio can be sent to.
-struct AudioOutput: Identifiable, Hashable, Sendable {
-    let id: String
-    let name: String
-}
