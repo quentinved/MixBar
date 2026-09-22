@@ -3,7 +3,13 @@
 // one muted, one holding a stream open while playing nothing. Glyphs are
 // inline SVG: the CSP's img-src 'self' blocks data: URIs, masks included.
 const roster = [
-  { name: "Music", volume: 78, color: "#f2515d", glyph: "M8 3v10.3A3 3 0 1 0 10 16V7l6-1.5V3z" },
+  {
+    name: "Music",
+    volume: 78,
+    color: "#f2515d",
+    glyph:
+      "M6.8 5.6 16.2 3v2.6L6.8 8.2zM6.8 6.5h1.6V15H6.8zM14.6 4h1.6v9h-1.6zM3 15a2.4 2.4 0 1 1 4.8 0a2.4 2.4 0 1 1-4.8 0zM10.8 13a2.4 2.4 0 1 1 4.8 0a2.4 2.4 0 1 1-4.8 0z",
+  },
   {
     name: "Browser",
     volume: 100,
@@ -31,7 +37,7 @@ const roster = [
     color: "#e08c2b",
     silent: true,
     glyph:
-      "M6 5h8a5 5 0 0 1 5 5v1a3 3 0 0 1-5.3 1.9L12.5 11h-5l-1.2 1.9A3 3 0 0 1 1 11v-1a5 5 0 0 1 5-5zm1 2v1.5H5.5v1.5H7V11.5h1.5V10H10V8.5H8.5V7zm6 .5a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-2 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2z",
+      "M6 5h8a5 5 0 0 1 5 5v1a3 3 0 0 1-5.3 1.9L12.5 11h-5l-1.2 1.9A3 3 0 0 1 1 11v-1a5 5 0 0 1 5-5zM5.3 6.8v1.5H3.8v1.4h1.5v1.5h1.4V9.7h1.5V8.3H6.7V6.8zM12.4 7.6a1.1 1.1 0 1 0 2.2 0a1.1 1.1 0 1 0-2.2 0zM14.2 9.8a1.1 1.1 0 1 0 2.2 0a1.1 1.1 0 1 0-2.2 0z",
   },
 ];
 ---

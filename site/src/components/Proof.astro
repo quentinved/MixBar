@@ -26,18 +26,20 @@ const facts = [
 ---
 
 <section class="proof" id="proof" aria-label="In numbers">
-  <ul class="wrap proof__grid">
-    {
-      facts.map((fact) => (
-        <li class="proof__item reveal">
-          <p class="proof__figure">
-            <span class="grad">{fact.figure}</span> {fact.label}
-          </p>
-          <p class="proof__why">{fact.why}</p>
-        </li>
-      ))
-    }
-  </ul>
+  <div class="wrap">
+    <ul class="proof__grid">
+      {
+        facts.map((fact) => (
+          <li class="proof__item reveal">
+            <p class="proof__figure">
+              <span class="grad">{fact.figure}</span> {fact.label}
+            </p>
+            <p class="proof__why">{fact.why}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
 </section>
 
 <style>
@@ -51,8 +53,10 @@ const facts = [
     margin: 0;
     padding-block: 0;
     list-style: none;
+    overflow: hidden;
     background: var(--hairline);
-    border-block: 1px solid var(--hairline);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
   }
   .proof__item {
     padding: 28px 24px;
