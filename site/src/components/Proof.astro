@@ -1,0 +1,89 @@
+---
+import { testCount } from "../data/repo";
+
+const facts = [
+  {
+    figure: "0",
+    label: "kernel extensions",
+    why: "No driver to install, no restart, no installer privileges.",
+  },
+  {
+    figure: "0",
+    label: "network calls",
+    why: "There is no network code in the app. Nothing leaves your Mac.",
+  },
+  {
+    figure: "0",
+    label: "taps at 100%",
+    why: "At default volume MixBar creates nothing in your audio path at all.",
+  },
+  {
+    figure: String(testCount),
+    label: "tests, no audio hardware",
+    why: "The rules are framework‑free and run on a CI box with no output device.",
+  },
+];
+---
+
+<section class="proof" id="proof" aria-label="In numbers">
+  <ul class="wrap proof__grid">
+    {
+      facts.map((fact) => (
+        <li class="proof__item reveal">
+          <p class="proof__figure">
+            <span class="grad">{fact.figure}</span> {fact.label}
+          </p>
+          <p class="proof__why">{fact.why}</p>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .proof {
+    padding: 24px 0 40px;
+  }
+  .proof__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    margin: 0;
+    padding-block: 0;
+    list-style: none;
+    background: var(--hairline);
+    border-block: 1px solid var(--hairline);
+  }
+  .proof__item {
+    padding: 28px 24px;
+    background: var(--surface);
+  }
+  .proof__figure {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .proof__figure .grad {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    margin-right: 4px;
+  }
+  .proof__why {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 0.9375rem;
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 62rem) {
+    .proof__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 36rem) {
+    .proof__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

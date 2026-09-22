@@ -1,0 +1,129 @@
+---
+import { links } from "../data/links";
+import { releases } from "../data/releases";
+
+const dateOf = (iso: string) =>
+  new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+---
+
+<section class="section" id="changelog">
+  <div class="wrap">
+    <div class="section__head reveal">
+      <p class="eyebrow">Changelog</p>
+      <h2>What changed, and when.</h2>
+      <p class="lede">
+        Every release is signed, notarized and published <a href={links.releases}>on GitHub</a>,
+        with the build that made it.
+      </p>
+    </div>
+
+    <ol class="timeline">
+      {
+        releases.map((release, index) => (
+          <li class="release reveal">
+            <div class="release__when">
+              <span class="release__version grad">{release.version}</span>
+              <time datetime={release.date}>{dateOf(release.date)}</time>
+              {index === 0 && <span class="release__latest">Latest</span>}
+            </div>
+            <div class="release__what">
+              <h3>{release.title}</h3>
+              <ul>
+                {release.changes.map((change) => <li>{change}</li>)}
+              </ul>
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .timeline {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .release {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 24px;
+    padding: 28px 0;
+    border-top: 1px solid var(--hairline);
+  }
+  .release:last-child {
+    border-bottom: 1px solid var(--hairline);
+  }
+  .release__when {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+  .release__version {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  time {
+    color: var(--muted);
+    font-size: 0.875rem;
+  }
+  .release__latest {
+    margin-top: 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: rgba(107, 92, 242, 0.22);
+    color: var(--brand-light);
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .release__what ul {
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.9375rem;
+  }
+  .release__what li {
+    position: relative;
+    padding-left: 18px;
+    text-wrap: pretty;
+  }
+  .release__what li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.65em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--brand);
+  }
+
+  @media (max-width: 40rem) {
+    .release {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .release__when {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .release__latest {
+      margin-top: 0;
+    }
+  }
+</style>

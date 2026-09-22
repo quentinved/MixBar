@@ -98,7 +98,7 @@ menu bar mixer are people who want to know.
 | --- | --- |
 | `docs/brand/mark.svg` | README, website, anywhere vector works |
 | `docs/brand/mark-1024.png` | Raster fallback, social avatars |
-| `site/og.png` | Link previews (1200×630) |
+| `site/public/og.png` | Link previews (1200×630) |
 | `build/AppIcon.icns` | Generated at build time, never committed |
 
 Regenerate the raster assets with `swift tools/make-icon.swift --brand`.

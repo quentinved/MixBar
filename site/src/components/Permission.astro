@@ -1,0 +1,113 @@
+---
+import { links } from "../data/links";
+---
+
+<section class="section" id="permission">
+  <div class="wrap">
+    <div class="permission card reveal">
+      <div class="permission__copy">
+        <p class="eyebrow">The permission</p>
+        <h2>Why it asks to record audio.</h2>
+        <p class="lede">
+          Apple classifies reading another app's sound as recording, under the same umbrella as
+          the microphone. So MixBar needs the <strong>Audio Recording</strong> permission, even
+          though it never touches your microphone.
+        </p>
+        <p>
+          You do not have to take that on faith. There is no network code in the app, and the
+          part that handles your audio is <a href={links.mixer}>one file</a>: it multiplies
+          buffers by a gain, sums them, and writes them to your output device.
+        </p>
+      </div>
+      <dl class="permission__facts">
+        <div class="is-yes">
+          <dt>What it reads</dt>
+          <dd>The audio of an app whose slider you moved, for as long as it is not at 100%.</dd>
+        </div>
+        <div class="is-no">
+          <dt>Your microphone</dt>
+          <dd>Never opened. The permission's name is Apple's, not a description of what happens.</dd>
+        </div>
+        <div class="is-no">
+          <dt>Disk or network</dt>
+          <dd>Nothing is recorded, written to a file, or sent anywhere.</dd>
+        </div>
+        <div class="is-yes">
+          <dt>Revoking it</dt>
+          <dd>System Settings → Privacy &amp; Security. MixBar keeps working as a list of apps, with the sliders doing nothing.</dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<style>
+  .permission {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 40px;
+    padding: 40px;
+    background:
+      linear-gradient(135deg, rgba(107, 92, 242, 0.12), transparent 60%),
+      var(--surface-2);
+  }
+  .permission__copy p + p {
+    margin-top: 16px;
+    color: var(--muted);
+  }
+  .permission strong {
+    color: var(--ink);
+  }
+  .permission__facts {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    align-content: center;
+  }
+  .permission__facts div {
+    position: relative;
+    padding: 14px 16px 14px 44px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    background: var(--film);
+  }
+  .permission__facts div::before {
+    position: absolute;
+    left: 16px;
+    top: 15px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .is-yes::before {
+    content: "✓";
+    color: var(--surface);
+    background: var(--ok);
+  }
+  .is-no::before {
+    content: "✕";
+    color: var(--surface);
+    background: var(--no);
+  }
+  dt {
+    font-weight: 600;
+  }
+  dd {
+    margin: 4px 0 0;
+    color: var(--muted);
+    font-size: 0.9375rem;
+    text-wrap: pretty;
+  }
+
+  @media (max-width: 62rem) {
+    .permission {
+      grid-template-columns: 1fr;
+      padding: 28px 24px;
+    }
+  }
+</style>

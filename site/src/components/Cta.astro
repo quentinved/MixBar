@@ -1,0 +1,79 @@
+---
+import { links } from "../data/links";
+---
+
+<section class="section" id="get">
+  <div class="wrap">
+    <div class="get card reveal">
+      <div class="get__copy">
+        <h2>Get it.</h2>
+        <ol class="get__steps">
+          <li>Download the <code>.dmg</code> and drag MixBar to Applications.</li>
+          <li>Open it. macOS asks once for permission to record audio.</li>
+          <li>Click the slider icon in the menu bar.</li>
+        </ol>
+        <div class="cta">
+          <a class="button button--primary" href={links.download}>Download for macOS</a>
+          <a class="button" href={links.repo}>View the source</a>
+        </div>
+        <p class="get__fine">
+          Requires macOS 15 or later · Apple silicon and Intel · Signed and notarized · MIT
+        </p>
+      </div>
+      <img class="get__mark" src="/mark.svg" width="180" height="180" alt="" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .get {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 40px;
+    align-items: center;
+    padding: 48px;
+    overflow: hidden;
+    background:
+      radial-gradient(60% 100% at 100% 50%, rgba(158, 61, 227, 0.22), transparent 70%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+  }
+  .get__steps {
+    margin: 20px 0 28px;
+    padding-left: 22px;
+    color: var(--ink-2);
+    display: grid;
+    gap: 8px;
+  }
+  .get__fine {
+    margin-top: 20px;
+    font-size: 0.8125rem;
+    color: var(--muted);
+  }
+  .get__mark {
+    filter: drop-shadow(0 30px 60px rgba(107, 92, 242, 0.55));
+  }
+
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateY(0) rotate(-2deg);
+    }
+    50% {
+      transform: translateY(-10px) rotate(2deg);
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .get__mark {
+      animation: bob 7s ease-in-out infinite;
+    }
+  }
+  @media (max-width: 50rem) {
+    .get {
+      grid-template-columns: 1fr;
+      padding: 32px 24px;
+    }
+    .get__mark {
+      display: none;
+    }
+  }
+</style>

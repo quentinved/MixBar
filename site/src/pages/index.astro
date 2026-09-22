@@ -1,0 +1,113 @@
+---
+import Base from "../layouts/Base.astro";
+import Hero from "../components/Hero.astro";
+import Proof from "../components/Proof.astro";
+import Demo from "../components/Demo.astro";
+import Features from "../components/Features.astro";
+import Layouts from "../components/Layouts.astro";
+import HowItWorks from "../components/HowItWorks.astro";
+import Permission from "../components/Permission.astro";
+import Compare from "../components/Compare.astro";
+import Faq from "../components/Faq.astro";
+import Changelog from "../components/Changelog.astro";
+import Cta from "../components/Cta.astro";
+import { getImage } from "astro:assets";
+import { links } from "../data/links";
+import { faq, plainText } from "../data/faq";
+import { releases } from "../data/releases";
+import { version } from "../data/repo";
+import comfortable from "../assets/shots/comfortable-dark.png";
+import compact from "../assets/shots/compact-dark.png";
+import mixer from "../assets/shots/mixer-dark.png";
+
+const title = "MixBar — Per-app volume for Mac";
+const description =
+  "Per-app volume control for macOS: a slider for every app that's making noise, right in the menu bar, plus quick output-device switching. Free and open source.";
+const site = Astro.site?.href ?? "/";
+const absolute = (path: string) => new URL(path, site).href;
+
+const screenshots = await Promise.all(
+  [comfortable, compact, mixer].map((shot) => getImage({ src: shot, format: "webp" })),
+);
+const first = releases[releases.length - 1];
+const latest = releases[0];
+
+const structured = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "MixBar",
+  url: site,
+  description,
+  softwareVersion: version,
+  datePublished: first?.date,
+  dateModified: latest?.date,
+  releaseNotes: links.releases,
+  applicationCategory: "UtilitiesApplication",
+  applicationSubCategory: "Audio",
+  operatingSystem: "macOS 15 or later",
+  processorRequirements: "Apple silicon or Intel",
+  downloadUrl: `${links.releases}/latest`,
+  softwareHelp: links.readme,
+  license: "https://opensource.org/licenses/MIT",
+  isAccessibleForFree: true,
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  image: absolute("/og.png"),
+  screenshot: screenshots.map((image) => absolute(image.src)),
+  featureList: [
+    "Per-app volume and mute",
+    "Live per-app level meters",
+    "Output device switching",
+    "Volume remembered per app",
+    "Helper-process grouping for browsers and Electron apps",
+  ],
+  author: { "@type": "Person", name: "Quentin Vedrenne", url: links.author },
+  sameAs: links.repo,
+};
+
+const questions = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faq.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: { "@type": "Answer", text: plainText(item.answer) },
+  })),
+};
+---
+
+<Base title={title} description={description}>
+  <Fragment slot="head">
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MixBar" />
+    <meta property="og:locale" content="en" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content="A slider for every app that's making noise, in your Mac's menu bar. Free and open source." />
+    <meta property="og:url" content={site} />
+    <meta property="og:image" content={`${site}og.png`} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="MixBar: the menu-bar popover, with a volume slider for each app that is playing." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${site}og.png`} />
+    <!-- A data block, not a script: the parser never executes it, so the
+         default-src 'none' CSP leaves it alone and crawlers still read it. -->
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(structured)} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(questions)} />
+  </Fragment>
+
+  <Hero />
+  <main>
+    <Proof />
+    <Demo />
+    <Features />
+    <Layouts />
+    <HowItWorks />
+    <Permission />
+    <Compare />
+    <Faq />
+    <Changelog />
+    <Cta />
+  </main>
+</Base>

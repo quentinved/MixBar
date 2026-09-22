@@ -1,0 +1,329 @@
+/* Tokens follow docs/BRAND.md. Dark only: the gradient is the brand, and the
+   neutrals were chosen to sit under it rather than compete. */
+
+@font-face {
+  font-family: "Inter Variable";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2")
+    format("woff2-variations");
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../../node_modules/@fontsource/jetbrains-mono/files/jetbrains-mono-latin-400-normal.woff2")
+    format("woff2");
+}
+
+:root {
+  color-scheme: dark;
+
+  --brand-indigo: #6b5cf2;
+  --brand-violet: #9e3de3;
+  --brand: linear-gradient(135deg, var(--brand-indigo), var(--brand-violet));
+  --brand-light: #a79bf7;
+
+  --ink: #edeaf5;
+  --ink-2: #c4bfd6;
+  --muted: #9b96ad;
+  --surface: #0c0a14;
+  --surface-2: #17141f;
+  --border: #262133;
+  --hairline: rgba(255, 255, 255, 0.08);
+  --film: rgba(255, 255, 255, 0.03);
+  --ok: #4ad295;
+  --no: #f06a7a;
+
+  --radius: 14px;
+  --radius-lg: 24px;
+  --nav-h: 60px;
+  --wrap: 72rem;
+  --measure: 36rem;
+  --gutter: 24px;
+
+  --sans: "Inter Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--surface);
+  scroll-padding-top: calc(var(--nav-h) + 24px);
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+/* Fixed, not a body background, so the light source stays put as you scroll. */
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+body::before {
+  background:
+    radial-gradient(900px 560px at 50% -12%, rgba(107, 92, 242, 0.32), transparent 70%),
+    radial-gradient(640px 440px at 90% 4%, rgba(158, 61, 227, 0.18), transparent 72%);
+}
+body::after {
+  background-image:
+    linear-gradient(var(--hairline) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hairline) 1px, transparent 1px);
+  background-size: 56px 56px;
+  opacity: 0.5;
+  -webkit-mask-image: radial-gradient(ellipse 70% 50% at 50% 0%, #000, transparent);
+  mask-image: radial-gradient(ellipse 70% 50% at 50% 0%, #000, transparent);
+}
+
+a {
+  color: var(--brand-light);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+::selection {
+  background: rgba(107, 92, 242, 0.45);
+  color: #fff;
+}
+:focus-visible {
+  outline: 2px solid var(--brand-indigo);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+  font-weight: 650;
+  text-wrap: balance;
+}
+h2 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+}
+h3 {
+  font-size: 1.125rem;
+  letter-spacing: -0.015em;
+}
+p {
+  margin: 0;
+}
+p + p {
+  margin-top: 1em;
+}
+code {
+  font-family: var(--mono);
+  font-size: 0.875em;
+  color: var(--ink);
+  background: var(--film);
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  padding: 0.1em 0.4em;
+}
+
+/* --- layout primitives --- */
+.wrap {
+  width: 100%;
+  max-width: var(--wrap);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+.section {
+  padding: 88px 0;
+}
+.section__head {
+  max-width: var(--measure);
+  margin-bottom: 40px;
+}
+.section__head--center {
+  margin-inline: auto;
+  text-align: center;
+}
+.lede {
+  margin-top: 16px;
+  color: var(--ink-2);
+  font-size: 1.125rem;
+  text-wrap: pretty;
+}
+.muted {
+  color: var(--muted);
+}
+.grad {
+  background: var(--brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.eyebrow::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
+  box-shadow: 0 0 12px rgba(107, 92, 242, 0.9);
+}
+
+/* --- buttons --- */
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: var(--film);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
+}
+.button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(167, 155, 247, 0.5);
+}
+.button--primary {
+  border-color: transparent;
+  background: var(--brand);
+  color: #fff;
+  box-shadow: 0 10px 34px -8px rgba(107, 92, 242, 0.75);
+}
+.button--primary:hover {
+  box-shadow: 0 16px 44px -10px rgba(107, 92, 242, 0.9);
+}
+.button--small {
+  padding: 8px 16px;
+  font-size: 0.875rem;
+}
+
+/* --- cards --- */
+.card {
+  position: relative;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.card--accent {
+  background:
+    linear-gradient(180deg, rgba(107, 92, 242, 0.14), rgba(158, 61, 227, 0.04)),
+    var(--surface-2);
+}
+
+/* --- scroll progress, driven by the animation below --- */
+.progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  z-index: 30;
+  background: var(--brand);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+/* --- motion --- */
+/* Every animation is behind two gates: reduced motion, and support for
+   scroll timelines. An `opacity: 0` must reach neither someone who asked for
+   stillness nor a browser that cannot scrub it back to 1. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes scrubbed {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes glow-drift {
+  0%,
+  100% {
+    transform: none;
+  }
+  50% {
+    transform: translate3d(-2.5%, 1.5%, 0) scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+  body::before {
+    animation: glow-drift 28s ease-in-out infinite;
+  }
+
+  /* `animation-duration: auto` is load-bearing: the shorthand resets it to 0s,
+     and a fixed duration pins a scrubbed animation to its first frame. */
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-duration: auto;
+      animation-timeline: view();
+      animation-range: entry 0% cover 28%;
+    }
+    .progress {
+      animation: scrubbed linear both;
+      animation-duration: auto;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+@media (max-width: 40rem) {
+  .section {
+    padding: 64px 0;
+  }
+}

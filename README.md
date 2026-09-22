@@ -22,8 +22,8 @@ output-device switching. Free and open source.
 <br>
 
 <picture>
-  <source srcset="site/shots/comfortable-dark.png" media="(prefers-color-scheme: dark)">
-  <img src="site/shots/comfortable.png" width="320"
+  <source srcset="site/src/assets/shots/comfortable-dark.png" media="(prefers-color-scheme: dark)">
+  <img src="site/src/assets/shots/comfortable.png" width="320"
        alt="The MixBar popover: a volume slider for each app that is playing.">
 </picture>
 
@@ -208,7 +208,7 @@ with meters driven by the clock:
 open build/MixBar.app --args --demo
 ```
 
-The screenshots in `site/shots/` are that same demo, posed and photographed:
+The screenshots in `site/src/assets/shots/` are that same demo, posed and photographed:
 
 ```sh
 ./app/build.sh && ./tools/screenshot.sh
@@ -306,6 +306,24 @@ cd spike && ./build.sh
 tools/package.sh            # -> dmg, pkg, Homebrew cask
 tools/release.sh            # the above, signed + notarized + stapled
 ```
+
+### The website
+
+`site/` is an [Astro](https://astro.build) project written in TypeScript and
+built to plain HTML and CSS. The page ships one script, the mixer demo, and is
+served under a Content Security Policy that allows nothing inline, so every
+stylesheet and script has to be a file. The version and the test count it quotes
+are read out of `app/` at build time rather than copied in.
+
+```sh
+npm ci --prefix site
+npm run dev --prefix site   # live reload, without the CSP
+tools/preview-site.sh       # the production build, served by wrangler with _headers and _redirects
+npm run build --prefix site && tools/check-site.sh
+```
+
+Cloudflare builds it the same way: `wrangler.jsonc` carries the build command,
+so a deploy is `wrangler deploy` and nothing else.
 
 ## Things that cost time to discover
 
@@ -420,8 +438,9 @@ anchors and external URLs alike. A dead link is otherwise invisible: the page
 renders, the sentence still reads correctly, and only someone who clicks finds
 out.
 
-`.github/workflows/site.yml` checks the landing page in `site/` for missing
-assets and dead links. It reports rather than gates: Cloudflare deploys the page
+`.github/workflows/site.yml` builds the landing page from `site/` and checks
+the result for missing assets, dead links and markup the Content Security
+Policy would drop. It reports rather than gates: Cloudflare deploys the page
 from its own Git integration and does not wait for GitHub Actions, so the gate is
 branch protection requiring the check on pull requests.
 

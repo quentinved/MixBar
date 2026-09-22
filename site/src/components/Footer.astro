@@ -1,0 +1,78 @@
+---
+import { links } from "../data/links";
+---
+
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <div class="footer__brand">
+      <img src="/mark.svg" width="32" height="32" alt="" />
+      <div>
+        <p class="footer__name">MixBar</p>
+        <p class="muted">Per‑app volume for Mac.</p>
+      </div>
+    </div>
+    <ul class="footer__links">
+      <li><a href={links.repo}>GitHub</a></li>
+      <li><a href={links.releases}>Releases</a></li>
+      <li><a href={links.bug}>Report a bug</a></li>
+      <li><a href={links.contributing}>Contributing</a></li>
+      <li><a href={links.security}>Security</a></li>
+      <li><a href={links.email}>Email</a></li>
+      <li><a href={links.license}>MIT licence</a></li>
+    </ul>
+    <p class="footer__fine">
+      Made by <a href={links.author} rel="me">Quentin Vedrenne</a>. Not affiliated with Apple.
+      macOS is a trademark of Apple Inc.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--hairline);
+    padding: 48px 0 56px;
+    font-size: 0.9375rem;
+    color: var(--muted);
+  }
+  .footer__inner {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 28px 40px;
+    align-items: center;
+  }
+  .footer__brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .footer__name {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .footer__links a {
+    color: var(--ink-2);
+    text-decoration: none;
+  }
+  .footer__links a:hover {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+  .footer__fine {
+    grid-column: 1 / -1;
+    font-size: 0.8125rem;
+  }
+
+  @media (max-width: 50rem) {
+    .footer__inner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

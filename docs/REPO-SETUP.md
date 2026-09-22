@@ -43,7 +43,7 @@ macos  swift  swiftui  audio  volume-control  per-app-volume
 coreaudio  audio-mixer  menubar  menu-bar-app  macos-app  open-source
 ```
 
-**Social preview:** Settings → General → Social preview → upload `site/og.png`.
+**Social preview:** Settings → General → Social preview → upload `site/public/og.png`.
 Without it, shared links show a generic grey box.
 
 ## 2. Features
@@ -129,29 +129,34 @@ gives a visitor nothing to do.
 ## 7. Cloudflare
 
 The page is a Worker whose whole deployment is static assets: `wrangler.jsonc`
-at the repository root points `assets.directory` at `site/`, and there is no
-build step and no script. Deployed from Cloudflare's own Git integration, which
-needs no GitHub secrets:
+at the repository root points `assets.directory` at `site/dist`, which Astro
+builds from `site/src`. The build command lives in `wrangler.jsonc` too, so
+wrangler runs it before every deploy and the dashboard needs none of its own.
+Deployed from Cloudflare's own Git integration, which needs no GitHub secrets:
 
 1. Cloudflare dashboard → **Workers & Pages** → Create → **Import a repository**.
 2. Authorise GitHub and pick the `MixBar` repository.
 3. **Name the Worker `mixbar`**, matching `name` in `wrangler.jsonc`. A mismatch
    does not fail the build — it uploads to a second Worker that no custom domain
    points at, and the deploy looks green while the page never changes.
-4. Build settings: **Build command** empty, **Deploy command** `npx wrangler
-   deploy` — Cloudflare uses `npx wrangler versions upload` for non-production
-   branches by itself. Leave the root directory alone.
+4. Build settings: **Build command** empty (wrangler runs the one in
+   `wrangler.jsonc`), **Deploy command** `npx wrangler deploy` — Cloudflare uses
+   `npx wrangler versions upload` for non-production branches by itself. Leave
+   the root directory alone: the config is at the repository root, and the build
+   reads `app/Info.plist` and `app/Tests/` for the numbers the page quotes.
 5. Deploy. You land on `mixbar.<subdomain>.workers.dev`, and every branch gets a
    preview version URL.
 6. Settings → **Build** → **Build watch paths** → set *Include paths* to
-   `site/*` and `wrangler.jsonc`. Without this a Swift-only commit still
-   triggers a rebuild and a new version, which makes the deployment list useless
-   for working out when the page last actually changed.
+   `site/*`, `wrangler.jsonc`, `app/Info.plist` and `app/Tests/*`. Without this
+   a Swift-only commit still triggers a rebuild and a new version, which makes
+   the deployment list useless for working out when the page last actually
+   changed; the two `app/` entries are there because the page quotes them.
 
-`site/_redirects` then makes `/download` always point at the newest GitHub
-release, so the download button never needs touching on a version bump.
-`site/_headers` sets the CSP and cache policy. Both are read from inside the
-assets directory, so they only work while they sit in `site/`.
+`site/public/_redirects` then makes `/download` always point at the newest
+GitHub release, so the download button never needs touching on a version bump.
+`site/public/_headers` sets the CSP and cache policy. Astro copies `public/`
+into `dist/` untouched, and both are read from inside the assets directory, so
+they only work while they sit there.
 
 **Cloudflare does not wait for GitHub Actions.** A push to `main` deploys whether
 or not the `check` job in `site.yml` passed, so that job reports rather than
