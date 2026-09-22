@@ -44,11 +44,31 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 return None
         return super().send_head()
 
+    # wrangler.jsonc sets not_found_handling: "404-page", so an unknown path is
+    # the styled page with its 404 status, not the server's own error body.
+    def send_error(self, code, message=None, explain=None):
+        if code == 404:
+            body = open(f"{site}/404.html", "rb").read()
+            self.send_response(404)
+            self.send_header("Content-Type", "text/html")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            if self.command != "HEAD":
+                self.wfile.write(body)
+            return
+        super().send_error(code, message, explain)
+
     def end_headers(self):
         for pattern, headers in rules:
             if matches(pattern, self.path.split("?")[0]):
                 for name, value in headers:
+                    # The one header we deliberately do not mirror: production
+                    # caches styles.css for an hour, and a preview that does the
+                    # same shows you the previous edit until you empty the cache.
+                    if name.lower() == "cache-control":
+                        value = "no-store"
                     self.send_header(name, value)
+        self.send_header("Cache-Control", "no-store")
         super().end_headers()
 
 http.server.HTTPServer(("127.0.0.1", port),
