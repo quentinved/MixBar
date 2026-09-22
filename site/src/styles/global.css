@@ -165,6 +165,9 @@ code {
   font-size: 1.125rem;
   text-wrap: pretty;
 }
+.nowrap {
+  white-space: nowrap;
+}
 .muted {
   color: var(--muted);
 }

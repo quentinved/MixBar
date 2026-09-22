@@ -39,7 +39,8 @@ if (root) {
       };
     },
   );
-  const status = root.querySelector<HTMLElement>("[data-status]");
+  const statusHead = root.querySelector<HTMLElement>("[data-status-head]");
+  const statusDetail = root.querySelector<HTMLElement>("[data-status-detail]");
   const reset = root.querySelector<HTMLButtonElement>("[data-reset]");
   const stillness = matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -68,15 +69,15 @@ if (root) {
   }
 
   function describe(): void {
-    if (!status) return;
     const routed = channels.filter(isRouted);
+    if (!statusHead || !statusDetail) return;
     if (routed.length === 0) {
-      status.textContent = "Audio path untouched. No taps, no aggregate device.";
+      statusHead.textContent = "Audio path untouched";
+      statusDetail.textContent = "No taps, no aggregate device.";
       return;
     }
-    const names = routed.map((channel) => channel.name).join(", ");
-    const taps = routed.length === 1 ? "1 tap" : `${routed.length} taps`;
-    status.textContent = `${taps}, one aggregate device. Routed: ${names}.`;
+    statusHead.textContent = routed.length === 1 ? "1 tap, 1 aggregate device" : `${routed.length} taps, 1 aggregate device`;
+    statusDetail.textContent = `Routed: ${routed.map((channel) => channel.name).join(", ")}`;
   }
 
   for (const channel of channels) {

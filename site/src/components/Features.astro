@@ -1,16 +1,8 @@
----
-import { links } from "../data/links";
----
-
 <section class="section" id="features">
   <div class="wrap">
     <div class="section__head reveal">
       <p class="eyebrow">Features</p>
-      <h2>Everything a mixer needs. Nothing a menu bar can't hold.</h2>
-      <p class="lede">
-        Click the slider icon in the menu bar. Apps appear as they start making sound, and
-        disappear from your audio path the moment you put them back at 100%.
-      </p>
+      <h2>Everything a mixer needs, in the menu bar.</h2>
     </div>
 
     <div class="bento">
@@ -30,7 +22,7 @@ import { links } from "../data/links";
       <article class="card feature reveal">
         <div class="feature__art art-meter" aria-hidden="true">
           <span class="art-meter__track"><i></i><em></em></span>
-          <span class="art-meter__labels"><span>signal</span><span>gain</span></span>
+          <span class="art-meter__labels"><span class="is-signal">signal</span><span class="is-gain">gain</span></span>
         </div>
         <h3>Meters that tell the truth</h3>
         <p>
@@ -41,14 +33,14 @@ import { links } from "../data/links";
 
       <article class="card feature reveal">
         <div class="feature__art art-devices" aria-hidden="true">
-          <div class="is-on"><b>MacBook Pro Speakers</b><small>Built‑in</small></div>
+          <div class="is-on"><b>MacBook Pro Speakers</b><small>Built-in</small></div>
           <div><b>AirPods Pro</b><small>Bluetooth</small></div>
           <div><b>Studio Display</b><small>Displays</small></div>
         </div>
         <h3>Output, one click away</h3>
         <p>
           Click the device name to switch. Devices are grouped by what they are, nearest thing
-          first: built‑in, headphones, Bluetooth, AirPlay, displays, external, virtual.
+          first: built-in, headphones, Bluetooth, AirPlay, displays, external, virtual.
         </p>
       </article>
 
@@ -76,26 +68,16 @@ import { links } from "../data/links";
         </p>
       </article>
 
-      <article class="card card--accent feature feature--wide feature--statement reveal">
+      <article class="card card--accent feature feature--full feature--statement reveal">
         <h3>Nothing in your audio path until you ask.</h3>
         <p>
           At default volume MixBar creates no taps and no aggregate device. An app enters the
           path only once its slider moves, and leaves the moment it returns to 100%. An earlier
-          version routed everything through the mixer and caused audible crackling system‑wide,
+          version routed everything through the mixer and caused audible crackling system-wide,
           even while mixing pure silence.
         </p>
       </article>
 
-      <article class="card feature reveal">
-        <div class="feature__art art-open" aria-hidden="true">
-          <span>MIT</span><span>Swift</span><span>0 deps</span>
-        </div>
-        <h3>Open, and small</h3>
-        <p>
-          No dependencies, no account, no telemetry. The part that touches your audio
-          is <a href={links.mixer}>one file</a> you can read in an afternoon.
-        </p>
-      </article>
     </div>
   </div>
 </section>
@@ -119,6 +101,9 @@ import { links } from "../data/links";
   }
   .feature--wide {
     grid-column: span 4;
+  }
+  .feature--full {
+    grid-column: 1 / -1;
   }
   .feature h3 {
     margin-top: auto;
@@ -244,19 +229,26 @@ import { links } from "../data/links";
     mix-blend-mode: screen;
   }
   .art-meter__labels {
-    display: flex;
+    position: relative;
+    display: block;
+    height: 1em;
     font-family: var(--mono);
     font-size: 0.6875rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--muted);
   }
-  .art-meter__labels span:first-child {
-    width: 46%;
+  .art-meter__labels span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-100%);
   }
-  .art-meter__labels span:last-child {
-    width: 26%;
-    text-align: right;
+  .art-meter__labels .is-signal {
+    left: 46%;
+  }
+  .art-meter__labels .is-gain {
+    left: 72%;
+    color: var(--brand-light);
   }
 
   .art-devices {
@@ -325,26 +317,14 @@ import { links } from "../data/links";
     color: var(--ink);
   }
 
-  .art-open {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-  }
-  .art-open span {
-    padding: 6px 12px;
-    border-radius: 999px;
-    border: 1px solid var(--hairline);
-    background: var(--film);
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    color: var(--ink);
-  }
 
   @media (max-width: 62rem) {
     .feature,
     .feature--wide {
       grid-column: span 3;
+    }
+    .feature--wide:first-child {
+      grid-column: 1 / -1;
     }
   }
   @media (max-width: 40rem) {

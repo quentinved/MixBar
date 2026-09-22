@@ -7,9 +7,7 @@ import Features from "../components/Features.astro";
 import Layouts from "../components/Layouts.astro";
 import HowItWorks from "../components/HowItWorks.astro";
 import Permission from "../components/Permission.astro";
-import Compare from "../components/Compare.astro";
 import Faq from "../components/Faq.astro";
-import Changelog from "../components/Changelog.astro";
 import Cta from "../components/Cta.astro";
 import { getImage } from "astro:assets";
 import { links } from "../data/links";
@@ -20,9 +18,9 @@ import comfortable from "../assets/shots/comfortable-dark.png";
 import compact from "../assets/shots/compact-dark.png";
 import mixer from "../assets/shots/mixer-dark.png";
 
-const title = "MixBar — Per-app volume for Mac";
+const title = "MixBar — Per-app volume control for Mac, in the menu bar";
 const description =
-  "Per-app volume control for macOS: a slider for every app that's making noise, right in the menu bar, plus quick output-device switching. Free and open source.";
+  "Per-app volume control for macOS: a slider for every app making sound, in the menu bar, plus one-click output switching. Free, open source, no audio driver.";
 const site = Astro.site?.href ?? "/";
 const absolute = (path: string) => new URL(path, site).href;
 
@@ -41,12 +39,12 @@ const structured = {
   softwareVersion: version,
   datePublished: first?.date,
   dateModified: latest?.date,
-  releaseNotes: links.releases,
+  releaseNotes: links.latest,
   applicationCategory: "UtilitiesApplication",
   applicationSubCategory: "Audio",
   operatingSystem: "macOS 15 or later",
   processorRequirements: "Apple silicon or Intel",
-  downloadUrl: `${links.releases}/latest`,
+  downloadUrl: links.latest,
   softwareHelp: links.readme,
   license: "https://opensource.org/licenses/MIT",
   isAccessibleForFree: true,
@@ -62,6 +60,14 @@ const structured = {
   ],
   author: { "@type": "Person", name: "Quentin Vedrenne", url: links.author },
   sameAs: links.repo,
+};
+
+// Google reads the site name shown in results from this, not from <title>.
+const website = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "MixBar",
+  url: site,
 };
 
 const questions = {
@@ -84,6 +90,7 @@ const questions = {
     <meta property="og:description" content="A slider for every app that's making noise, in your Mac's menu bar. Free and open source." />
     <meta property="og:url" content={site} />
     <meta property="og:image" content={`${site}og.png`} />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="MixBar: the menu-bar popover, with a volume slider for each app that is playing." />
@@ -93,6 +100,7 @@ const questions = {
     <meta name="twitter:image" content={`${site}og.png`} />
     <!-- A data block, not a script: the parser never executes it, so the
          default-src 'none' CSP leaves it alone and crawlers still read it. -->
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(website)} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(structured)} />
     <script is:inline type="application/ld+json" set:html={JSON.stringify(questions)} />
   </Fragment>
@@ -105,9 +113,7 @@ const questions = {
     <Layouts />
     <HowItWorks />
     <Permission />
-    <Compare />
     <Faq />
-    <Changelog />
     <Cta />
   </main>
 </Base>

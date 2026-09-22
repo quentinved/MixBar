@@ -2,19 +2,19 @@
 const steps = [
   {
     title: "List the audio processes.",
-    body: "Core Audio can enumerate every process that holds an output stream open. That is the roster.",
+    body: "Every process holding an output stream open. That is the roster.",
   },
   {
     title: "Group them by app.",
-    body: "Browsers and Electron apps play through anonymous helper processes. MixBar folds each one under the application that owns it, so there is one slider per app.",
+    body: "Browsers and Electron apps play through helper processes. Each is folded under the app that owns it.",
   },
   {
     title: "Tap the apps you adjusted.",
-    body: "For an app whose slider moved, one process tap spans all of its processes, marked private and muted‑when‑tapped: the app's own path to the speakers goes quiet while MixBar reads it.",
+    body: "One private tap per adjusted app. It silences the app's own output while MixBar reads it.",
   },
   {
     title: "Mix, and play it back.",
-    body: "The output device and every tap go into one private aggregate device. A single render callback applies each app's gain, sums the result and writes it out.",
+    body: "One aggregate device, one render callback: apply each gain, sum, write to your speakers.",
   },
 ];
 
@@ -25,10 +25,10 @@ const pipeline = ["Apps", "Process taps", "Aggregate device", "Render callback",
   <div class="wrap">
     <div class="section__head reveal">
       <p class="eyebrow">How it works</p>
-      <h2>macOS has no per‑app volume API. This is the way around it.</h2>
+      <h2>macOS has no per-app volume API. Here is the way around it.</h2>
       <p class="lede">
-        The only way to change one app's volume is to capture that app's audio and play it back
-        yourself at a different level. Four steps, no kernel extension and no virtual driver.
+        Capture an app's audio and play it back at a different level. No kernel extension, no
+        virtual driver.
       </p>
     </div>
 
@@ -48,13 +48,6 @@ const pipeline = ["Apps", "Process taps", "Aggregate device", "Render callback",
       }
     </ol>
 
-    <p class="how__note reveal">
-      The render callback runs on a thread with a hard deadline, so it allocates nothing, takes
-      no locks and holds no Swift references. A glitch there is audible. Everything that talks
-      to <code>coreaudiod</code>, building taps included, happens off the main thread: it is IPC,
-      takes almost two seconds, and blocks indefinitely on first run while the permission prompt
-      waits.
-    </p>
   </div>
 </section>
 
@@ -124,14 +117,6 @@ const pipeline = ["Apps", "Process taps", "Aggregate device", "Render callback",
     color: var(--muted);
     font-size: 0.9375rem;
     text-wrap: pretty;
-  }
-  .how__note {
-    max-width: 48rem;
-    margin-top: 32px;
-    padding-left: 18px;
-    border-left: 2px solid var(--brand-indigo);
-    color: var(--ink-2);
-    font-size: 0.9375rem;
   }
 
   @media (max-width: 62rem) {
