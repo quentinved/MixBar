@@ -1,10 +1,10 @@
 name: Site
 
 # The landing page in site/ is plain static files, so this only runs when they
-# change. Cloudflare Pages deploys the site from its own Git integration, which
-# does not wait for this check — so `check` is what tells you a push broke the
-# page, not what stops it. The deploy job stays as a fallback and skips entirely
-# unless the repository variable CLOUDFLARE_PROJECT is set.
+# change. Cloudflare deploys the site from its own Git integration and does not
+# wait for this check — so `check` reports that a push broke the page, it does
+# not stop it. The gate is branch protection requiring this check on pull
+# requests, so nothing broken reaches main to be deployed in the first place.
 on:
   push:
     branches: [main]
@@ -29,17 +29,3 @@ jobs:
       # a dead link, or markup the CSP drops on the floor.
       - name: Check site
         run: ./tools/check-site.sh
-
-  deploy:
-    needs: check
-    if: github.event_name != 'pull_request' && vars.CLOUDFLARE_PROJECT != ''
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Publish to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy site --project-name=${{ vars.CLOUDFLARE_PROJECT }}
