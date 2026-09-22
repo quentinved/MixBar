@@ -20,6 +20,7 @@
   /* The slab sits turned slightly away, like a product shot rather than a box. */
   --tilt: rotateY(-9deg) rotateX(4deg);
 
+  --nav-h: 58px;
   --measure: 34rem;
   --radius: 14px;
 }
@@ -31,7 +32,7 @@
   position: fixed;
   inset: 0 0 auto 0;
   height: 3px;
-  z-index: 10;
+  z-index: 30;
   background: var(--brand);
   transform: scaleX(0);
 }
@@ -74,11 +75,59 @@ a { color: var(--brand-light); text-decoration-thickness: 1px; text-underline-of
 
 h1, h2, h3 { letter-spacing: -0.025em; line-height: 1.15; }
 
+/* --- nav --- */
+/* Negative margins undo body's gutter so the glass reaches both screen edges;
+   the gutter comes back as padding, so the contents still line up with the page. */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  margin: 0 -24px;
+  padding: 0 24px;
+  background: rgba(7, 6, 12, 0.72);
+  -webkit-backdrop-filter: saturate(150%) blur(14px);
+  backdrop-filter: saturate(150%) blur(14px);
+  border-bottom: 1px solid var(--hairline);
+}
+.nav__inner {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  height: var(--nav-h);
+  max-width: 66rem;
+  margin: 0 auto;
+}
+.nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-right: auto;
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+.nav__links {
+  display: flex;
+  gap: 26px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9375rem;
+}
+.nav__links a { color: var(--muted); text-decoration: none; }
+.nav__links a:hover { color: var(--ink); }
+.nav__cta { padding: 8px 18px; font-size: 0.875rem; }
+
 /* --- hero --- */
 .hero {
   max-width: 66rem;
   margin: 0 auto;
-  padding: 76px 0 84px;
+  padding: 40px 0 30px;
+  /* The fold is the hero and nothing else: the next section peeking under it
+     read as a layout accident rather than an invitation to scroll. */
+  min-height: calc(100vh - var(--nav-h));
+  min-height: calc(100svh - var(--nav-h));
+  align-content: center;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
   gap: 56px;
@@ -255,7 +304,11 @@ h1, h2, h3 { letter-spacing: -0.025em; line-height: 1.15; }
 .layouts figcaption strong { color: var(--ink); font-weight: 600; }
 
 /* --- prose sections --- */
-.section { max-width: var(--measure); margin: 0 auto 68px; }
+.section {
+  max-width: var(--measure);
+  margin: 0 auto 84px;
+  scroll-margin-top: calc(var(--nav-h) + 28px);
+}
 .section h2 { font-size: 1.625rem; margin: 0 0 16px; }
 .section h2.statement {
   font-size: clamp(2.1rem, 6.5vw, 3.4rem);
@@ -306,6 +359,7 @@ h1, h2, h3 { letter-spacing: -0.025em; line-height: 1.15; }
   .hero__mark { margin-inline: auto; }
   .hero__sub { margin-inline: auto; }
   .hero .cta { justify-content: center; }
+  .nav__links { display: none; }
   /* Flat on a narrow screen: the tilt costs horizontal room there, not depth. */
   .shot__stage { transform: none; }
 }
