@@ -72,6 +72,21 @@
 <body>
 <div class="progress" aria-hidden="true"></div>
 
+<nav class="nav" aria-label="Primary">
+  <div class="nav__inner">
+    <a class="nav__brand" href="/">
+      <img src="/mark.svg" width="26" height="26" alt="">
+      <span>MixBar</span>
+    </a>
+    <ul class="nav__links">
+      <li><a href="#layouts">Layouts</a></li>
+      <li><a href="#permission">Permission</a></li>
+      <li><a href="https://github.com/quentinved/MixBar">Source</a></li>
+    </ul>
+    <a class="button button--primary nav__cta" href="/download">Download</a>
+  </div>
+</nav>
+
 <header class="hero">
  <div class="hero__copy">
   <img class="hero__mark" src="/mark.svg" width="88" height="88" alt="">
@@ -130,7 +145,7 @@
     </p>
   </section>
 
-  <section class="section section--wide">
+  <section class="section section--wide" id="layouts">
     <h2>Two more ways to see it</h2>
     <p class="lede">
       The panel above is the comfortable layout. The same mixer also folds down
@@ -151,7 +166,7 @@
     </div>
   </section>
 
-  <section class="section section--flag">
+  <section class="section section--flag" id="permission">
     <h2>Why it asks for microphone permission</h2>
     <p>
       macOS has no per&#8209;app volume API. The only way to change one app's volume
