@@ -20,3 +20,4 @@ site/node_modules/
 site/dist/
 site/.astro/
 .wrangler/
+site/node_modules/*
