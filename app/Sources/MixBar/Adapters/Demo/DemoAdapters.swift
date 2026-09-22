@@ -99,9 +99,9 @@ final class DemoMixingEngine: AudioMixingEngine {
 
 final class DemoOutputDirectory: AudioOutputDirectory {
     private static let all = [
-        AudioOutput(id: "builtin", name: "MacBook Pro Speakers"),
-        AudioOutput(id: "airpods", name: "AirPods Pro"),
-        AudioOutput(id: "display", name: "Studio Display"),
+        AudioOutput(id: "builtin", name: "MacBook Pro Speakers", kind: .builtIn),
+        AudioOutput(id: "airpods", name: "AirPods Pro", kind: .bluetooth),
+        AudioOutput(id: "display", name: "Studio Display", kind: .display),
     ]
 
     private var selected = DemoOutputDirectory.all[0]

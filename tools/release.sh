@@ -98,4 +98,9 @@ if [ -f "$CASK" ]; then
     /usr/bin/sed -i '' -E "s/sha256 \"[a-f0-9]{64}\"/sha256 \"$SHA\"/" "$CASK"
     echo "cask sha256 updated: $SHA"
 fi
+# The site's download button links to releases/latest/download/MixBar.dmg, so
+# one asset has to carry a name that does not move with the version. A byte copy
+# keeps the signature and the stapled ticket, so it needs no separate notarization.
+cp "$DMG" "$ROOT/build/MixBar.dmg"
+
 echo "release ready: $DMG"

@@ -117,6 +117,9 @@ struct MixerView: View {
                 Divider()
                 Button("Audio permission…") { viewModel.openPrivacySettings() }
                 Divider()
+                Button("Report a bug…") { viewModel.reportBug() }
+                Button("Email the developer…") { viewModel.emailDeveloper() }
+                Divider()
                 Button("Quit MixBar") { NSApplication.shared.terminate(nil) }
             } label: {
                 Image(systemName: "ellipsis")

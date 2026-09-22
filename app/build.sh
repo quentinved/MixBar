@@ -14,8 +14,11 @@ ROOT="$(cd .. && pwd)"
 #   SIGN_IDENTITY="Apple Development: Your Name (XXXXXXXXXX)" ./build.sh
 SIGN_IDENTITY="${SIGN_IDENTITY:--}"
 
-swift build -c release
-BIN="$(swift build -c release --show-bin-path)/MixBar"
+# Universal, so one download runs on both architectures. Building for the host
+# arch alone ships a DMG that is silently unopenable on every other kind of Mac.
+ARCHS=(--arch arm64 --arch x86_64)
+swift build -c release "${ARCHS[@]}"
+BIN="$(swift build -c release "${ARCHS[@]}" --show-bin-path)/MixBar"
 
 # Regenerate the icon so it can never drift from the generator.
 swift "$ROOT/tools/make-icon.swift" "$ROOT/build/AppIcon.iconset" >/dev/null

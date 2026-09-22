@@ -15,7 +15,7 @@ output-device switching. Free and open source.
 [![MIT licence](https://img.shields.io/badge/licence-MIT-9E3DE3)](LICENSE)
 
 [Download](https://github.com/quentinved/MixBar/releases/latest) ·
-[Website](https://mixbar.app) ·
+[Website](https://mixbar.quentinvedrenne.com) ·
 [Contributing](CONTRIBUTING.md) ·
 [Security](SECURITY.md)
 
@@ -142,8 +142,27 @@ to start — it covers the build loop, the one architectural rule, and the Core
 Audio traps that will otherwise cost you an afternoon. The items under
 [Status](#status) that are not done yet are where help goes furthest.
 
+Bugs are welcome too: [open an issue](https://github.com/quentinved/MixBar/issues/new?template=bug_report.yml)
+— the form asks which apps were playing, which output device and for the debug
+log, because an audio bug is hard to act on without them — or, if you would
+rather not use GitHub, email **contact@quentinvedrenne.com** with the same
+details. The same two routes are in the app, under the `…` menu.
+
 By taking part you agree to the [Code of Conduct](CODE_OF_CONDUCT.md). Security
 problems go through [SECURITY.md](SECURITY.md), privately, not as a public issue.
+
+### Community
+
+- **Slack** — [join the workspace](SLACK_INVITE_URL), for setup questions, "does
+  this work on your machine" reports, and anything too small for an issue.
+- **[Issues](https://github.com/quentinved/MixBar/issues)** — bugs and feature
+  requests, so they stay findable and get tracked.
+- **Email** — **contact@quentinvedrenne.com**, if you would rather not use
+  GitHub at all.
+
+Audio bugs depend on hardware and on which apps were playing, so Slack is often
+the faster route to working out whether something is a bug or a local setup
+before it becomes an issue.
 
 The rest of this section is the detail behind that guide.
 
@@ -156,7 +175,7 @@ macOS 15 to run it.
 ```sh
 git clone https://github.com/quentinved/MixBar.git
 cd MixBar/app
-swift test                  # 33 tests, no audio hardware needed
+swift test                  # 37 tests, no audio hardware needed
 ./build.sh                  # -> build/MixBar.app
 open ../build/MixBar.app
 ```
@@ -234,13 +253,14 @@ The architecture is hexagonal and the dependency rule is enforced by review:
 - A new **mechanism** (Core Audio, UserDefaults, SwiftUI) goes in `Adapters/`.
 
 If you find yourself importing `CoreAudio` or `SwiftUI` inside `Domain/`, the
-design has gone wrong rather than the rule. `CLAUDE.md` has the full
-conventions, including the real-time thread constraints.
+design has gone wrong rather than the rule.
+[CONTRIBUTING.md](CONTRIBUTING.md) has the full conventions, including the
+real-time thread constraints.
 
 ### Tests
 
 `swift test` must pass with no audio device, no output and no permission grant
-— CI depends on it. Three suites:
+— CI depends on it. Four suites:
 
 - **Mixer rules** — the domain, driven through `MixerService` against the fakes.
 - **Render thread** — `renderMix` is a free function over raw buffers, so the
@@ -249,6 +269,8 @@ conventions, including the real-time thread constraints.
 - **Settings storage** — the `UserDefaults` round-trip, in a throwaway domain,
   including the plist type coercion that makes a stored volume come back as an
   `Int` or a `String`.
+- **Output devices** — how the device list is sectioned by transport kind, and
+  what an unrecognised transport is called.
 
 Never add a test that needs Core Audio. Name tests as the behaviour they
 protect.
@@ -394,7 +416,16 @@ cannot escape the mixer by moving audio to another helper.
 
 `.github/workflows/test.yml` runs the suite on every push. The core imports no
 frameworks and every port has a fake, so it needs no audio device and no
-permissions on the runner.
+permissions on the runner. A second job runs `tools/check-links.sh` on Linux,
+which walks every markdown file and resolves each link — local paths, heading
+anchors and external URLs alike. A dead link is otherwise invisible: the page
+renders, the sentence still reads correctly, and only someone who clicks finds
+out.
+
+`.github/workflows/site.yml` checks the landing page in `site/` for missing
+assets and dead links. It reports rather than gates: Cloudflare deploys the page
+from its own Git integration and does not wait for GitHub Actions, so the gate is
+branch protection requiring the check on pull requests.
 
 `.github/workflows/release.yml` publishes a signed, notarized release when you
 push a tag:

@@ -23,3 +23,13 @@ jobs:
       - name: Build
         working-directory: app
         run: swift build -c release
+
+  # Separate, and on Linux: this needs no Xcode and no macOS runner, and a dead
+  # link should not wait behind a ten-minute build to be reported.
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check documentation links
+        run: tools/check-links.sh
