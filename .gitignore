@@ -14,3 +14,9 @@ spike/audiotap-spike.app/
 # Build artifacts
 build/
 .vscode/*
+
+# The website is built by Astro; only its sources are committed
+site/node_modules/
+site/dist/
+site/.astro/
+.wrangler/

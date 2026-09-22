@@ -6,12 +6,12 @@
 # where the window landed or what is in front of it. Screen Recording must be
 # granted to whatever runs this — the terminal, not MixBar.
 #
-#   ./tools/screenshot.sh [outdir]      default: site/shots
+#   ./tools/screenshot.sh [outdir]      default: site/src/assets/shots
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 APP="build/MixBar.app/Contents/MacOS/MixBar"
-OUT="${1:-site/shots}"
+OUT="${1:-site/src/assets/shots}"
 [ -x "$APP" ] || { echo "build it first: ./app/build.sh" >&2; exit 1; }
 mkdir -p "$OUT"
 

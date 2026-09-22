@@ -1,0 +1,123 @@
+---
+import { Picture } from "astro:assets";
+import compact from "../assets/shots/compact-dark.png";
+import comfortable from "../assets/shots/comfortable-dark.png";
+import mixer from "../assets/shots/mixer-dark.png";
+
+// Captured at 2x by tools/screenshot.sh, so each image is shown at half its
+// pixel size and the browser gets a Retina asset for free.
+const layouts = [
+  {
+    name: "Compact",
+    blurb: "One line per app, to see the most at once.",
+    shot: compact,
+    alt: "The compact layout: one line per app, name and slider on the same row.",
+  },
+  {
+    name: "Comfortable",
+    blurb: "Icon, name and a full‑width slider. The default.",
+    shot: comfortable,
+    alt: "The comfortable layout: an icon, the app name and a full-width slider per row.",
+  },
+  {
+    name: "Mixer",
+    blurb: "Vertical faders side by side, like a mixing desk.",
+    shot: mixer,
+    alt: "The mixer layout: vertical faders side by side, like a mixing desk.",
+  },
+];
+---
+
+<section class="section layouts" id="layouts">
+  <div class="wrap">
+    <div class="section__head reveal">
+      <p class="eyebrow">Layouts</p>
+      <h2>Three ways to see it.</h2>
+      <p class="lede">
+        Two apps or twenty, it is meant to be read at a glance and closed again. Pick from the
+        segmented control at the top.
+      </p>
+    </div>
+    <div class="layouts__grid">
+      {
+        layouts.map((layout) => (
+          <figure class="layout reveal">
+            <div class="layout__shot">
+              <Picture
+                src={layout.shot}
+                formats={["avif", "webp"]}
+                width={layout.shot.width / 2}
+                densities={[1, 2]}
+                loading="lazy"
+                alt={layout.alt}
+              />
+            </div>
+            <figcaption>
+              <strong>{layout.name}</strong>
+              <span>{layout.blurb}</span>
+            </figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .layouts__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    align-items: stretch;
+  }
+  .layout {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    background: var(--film);
+    overflow: hidden;
+  }
+  /* Bounded by height, not width: the three have very different aspect
+     ratios, and equal boxes would make the tallest one look like the point. */
+  .layout__shot {
+    flex: 1;
+    display: grid;
+    place-items: center;
+    padding: 28px 20px;
+    background: radial-gradient(70% 70% at 50% 100%, rgba(107, 92, 242, 0.25), transparent 70%);
+  }
+  .layout__shot img {
+    max-width: 100%;
+    max-height: 280px;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    border: 1px solid var(--hairline);
+    box-shadow: 0 26px 50px -24px rgba(0, 0, 0, 0.9);
+    transition: transform 0.35s var(--ease-out);
+  }
+  .layout:hover img {
+    transform: translateY(-4px);
+  }
+  figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 16px 20px 20px;
+    border-top: 1px solid var(--hairline);
+    font-size: 0.9375rem;
+    color: var(--muted);
+  }
+  figcaption strong {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  @media (max-width: 50rem) {
+    .layouts__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,31 +1,52 @@
 name: Site
 
-# The landing page in site/ is plain static files, so this only runs when they
-# change. Cloudflare deploys the site from its own Git integration and does not
-# wait for this check — so `check` reports that a push broke the page, it does
-# not stop it. The gate is branch protection requiring this check on pull
-# requests, so nothing broken reaches main to be deployed in the first place.
+# The landing page is built by Astro from site/src, and quotes the app's
+# version and test count straight out of the repository, so it runs when any
+# of those change. Cloudflare deploys the site from its own Git integration and
+# does not wait for this check — so `check` reports that a push broke the page,
+# it does not stop it. The gate is branch protection requiring this check on
+# pull requests, so nothing broken reaches main to be deployed in the first place.
 on:
   push:
     branches: [main]
     paths:
       - "site/**"
+      - "app/Info.plist"
+      - "app/Tests/**"
       - "tools/check-site.sh"
+      - "wrangler.jsonc"
       - ".github/workflows/site.yml"
   pull_request:
     paths:
       - "site/**"
+      - "app/Info.plist"
+      - "app/Tests/**"
       - "tools/check-site.sh"
+      - "wrangler.jsonc"
       - ".github/workflows/site.yml"
   workflow_dispatch:
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
     steps:
       - uses: actions/checkout@v4
 
-      # The page has no build step, so nothing else would catch a missing asset,
-      # a dead link, or markup the CSP drops on the floor.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      # `astro check` type-checks the components and the TypeScript behind the
+      # demo; `astro build` is what Cloudflare will run, from the same lockfile.
+      - name: Build site
+        run: npm ci && npm run build
+
+      # Nothing in the build catches a dead link, a missing asset, or markup
+      # the CSP drops on the floor.
       - name: Check site
-        run: ./tools/check-site.sh
+        run: ../tools/check-site.sh

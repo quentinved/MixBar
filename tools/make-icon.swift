@@ -224,8 +224,8 @@ if brandMode {
         exit(1)
     }
     write(mark, to: "docs/brand/mark-1024.png")
-    write(card, to: "site/og.png")
-    print("wrote docs/brand/mark-1024.png and site/og.png")
+    write(card, to: "site/public/og.png")
+    print("wrote docs/brand/mark-1024.png and site/public/og.png")
     exit(0)
 }
 

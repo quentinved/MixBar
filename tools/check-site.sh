@@ -1,39 +1,53 @@
 #!/bin/bash
-# Checks site/ before it ships. Every check here is a way the page breaks while
-# still rendering and reporting nothing — the CSP dropping a style="" attribute
-# is how the old mockup's sliders all sat at zero in production, and a canonical
-# naming a host that does not resolve is how the real URL stays out of the index.
+# Checks the built page before it ships. Every check here is a way the page
+# breaks while still rendering and reporting nothing — the CSP dropping a
+# style="" attribute is how the old mockup's sliders all sat at zero in
+# production, and a canonical naming a host that does not resolve is how the
+# real URL stays out of the index.
+#
+# Runs against site/dist: build first with `npm run build --prefix site`.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SITE="$ROOT/site"
+SITE="$ROOT/site/dist"
 HTML="$SITE/index.html"
 PAGES="index.html 404.html"
+
+[ -f "$HTML" ] || { echo "no build in site/dist — run: npm run build --prefix site" >&2; exit 1; }
 
 fails=0
 fail() { printf '  FAIL  %s\n' "$1"; fails=$((fails + 1)); }
 pass() { printf '  ok    %s\n' "$1"; }
 
 echo "Required files"
-for f in index.html 404.html styles.css _headers _redirects mark.svg mark-1024.png \
-         og.png robots.txt sitemap.xml; do
+for f in index.html 404.html _headers _redirects mark.svg mark-1024.png og.png \
+         robots.txt sitemap.xml; do
     if [ -f "$SITE/$f" ]; then pass "$f"; else fail "$f is missing"; fi
 done
 
 echo
 echo "Content-Security-Policy compatibility"
 for page in $PAGES; do
-    if grep -q 'style=' "$SITE/$page"; then
+    if grep -q ' style=' "$SITE/$page"; then
         fail "$page has style=\"\" attributes; style-src has no 'unsafe-inline'"
     else
         pass "$page: no inline style attributes"
     fi
-    # ld+json is a data block the parser never executes, so the CSP ignores it.
-    if grep -E '<script' "$SITE/$page" | grep -qvE '^<script type="application/ld\+json">$'; then
-        fail "$page has an executable script; default-src is 'none'"
-    elif grep -qE '\son[a-z]+=' "$SITE/$page"; then
-        fail "$page has an inline event handler; default-src is 'none'"
+    if grep -q '<style' "$SITE/$page"; then
+        fail "$page has a <style> block; style-src has no 'unsafe-inline'"
     else
-        pass "$page: no scripts or event handlers"
+        pass "$page: no inline stylesheet"
+    fi
+    # ld+json is a data block the parser never executes, and a module under
+    # /_astro/ is a file that script-src 'self' allows. Anything else is inline,
+    # and the CSP drops it on the floor.
+    if grep -oE '<script[^>]*>' "$SITE/$page" \
+        | grep -vE '^<script type="application/ld\+json">$' \
+        | grep -qvE '^<script type="module" src="/_astro/[^"]+"></script>$|^<script type="module" src="/_astro/[^"]+">$'; then
+        fail "$page has an inline script; script-src is 'self'"
+    elif grep -qE '\son[a-z]+=' "$SITE/$page"; then
+        fail "$page has an inline event handler; script-src is 'self'"
+    else
+        pass "$page: every script is a hashed file under /_astro/"
     fi
 done
 # Only subresources are governed by the CSP: a <link> or a src=, never an <a>.
@@ -52,17 +66,22 @@ done
 
 echo
 echo "Local references resolve"
-# srcset too: a missing dark-mode image is invisible, because the browser just
-# falls back to the light one and the page still looks right.
+# A fragment on the home page is the home page; a missing font or script is
+# invisible, because the page falls back to a system face and a still demo.
+# srcset carries several candidates with density descriptors, "/a.avif 1x, /b.avif 2x".
 for ref in $(grep -hoE '(href|src|srcset)="/[^"]*"' $(printf "$SITE/%s " $PAGES) \
-             | sed -E 's/.*"(.*)"/\1/' | sort -u); do
-    if [ -f "$SITE$ref" ] || [ "$ref" = "/" ]; then
+             | sed -E 's/.*"(.*)"/\1/' | tr ',' '\n' | sed -E 's/^ *//; s/ [0-9.]+[xw]$//' | sort -u); do
+    path="${ref%%#*}"
+    if [ -f "$SITE$path" ] || [ -z "$path" ] || [ "$path" = "/" ]; then
         pass "$ref"
-    elif grep -qE "^${ref}[[:space:]]" "$SITE/_redirects"; then
+    elif grep -qE "^${path}[[:space:]]" "$SITE/_redirects"; then
         pass "$ref (redirect)"
     else
         fail "$ref resolves to neither a file nor a redirect"
     fi
+done
+for ref in $(grep -hoE 'url\(/_astro/[^)]+\)' "$SITE"/_astro/*.css | sed -E 's/url\((.*)\)/\1/' | sort -u); do
+    if [ -f "$SITE$ref" ]; then pass "$ref"; else fail "$ref is named in a stylesheet but was not emitted"; fi
 done
 
 echo
@@ -93,8 +112,8 @@ else
 fi
 if command -v python3 >/dev/null; then
     python3 - "$HTML" "$canonical" <<'PY'
-import json, re, sys
-html = open(sys.argv[1], encoding="utf-8").read()
+import html as entities, json, re, sys
+page = open(sys.argv[1], encoding="utf-8").read()
 canonical = sys.argv[2]
 
 def check(ok, message):
@@ -102,22 +121,28 @@ def check(ok, message):
     return 0 if ok else 1
 
 bad = 0
-title = re.search(r"<title>(.*?)</title>", html, re.S).group(1)
+title = entities.unescape(re.search(r"<title>(.*?)</title>", page, re.S).group(1))
 bad += check(len(title) <= 60, f"title is {len(title)} chars (Google truncates past ~60)")
-desc = re.search(r'name="description" content="(.*?)"', html, re.S).group(1)
+desc = entities.unescape(re.search(r'name="description" content="(.*?)"', page, re.S).group(1))
 bad += check(120 <= len(desc) <= 160, f"meta description is {len(desc)} chars (want 120-160)")
 
-block = re.search(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)
-if not block:
-    bad += check(False, "no JSON-LD block")
-else:
+blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', page, re.S)
+kinds = {}
+for block in blocks:
     try:
-        data = json.loads(block.group(1))
+        data = json.loads(block)
     except json.JSONDecodeError as error:
         bad += check(False, f"JSON-LD does not parse: {error}")
     else:
-        bad += check(data.get("@type") == "SoftwareApplication", "JSON-LD is a SoftwareApplication")
-        bad += check(data.get("url") == f"https://{canonical}/", "JSON-LD url matches the canonical")
+        kinds[data.get("@type")] = data
+app = kinds.get("SoftwareApplication")
+bad += check(app is not None, "JSON-LD describes a SoftwareApplication")
+if app:
+    bad += check(app.get("url") == f"https://{canonical}/", "JSON-LD url matches the canonical")
+    bad += check(bool(app.get("softwareVersion")), f"JSON-LD carries the version ({app.get('softwareVersion')})")
+questions = kinds.get("FAQPage", {}).get("mainEntity", [])
+bad += check(len(questions) >= 5, f"JSON-LD FAQPage lists {len(questions)} questions")
+bad += check(all(q.get("acceptedAnswer", {}).get("text") for q in questions), "every FAQ answer has text")
 sys.exit(1 if bad else 0)
 PY
     [ $? -eq 0 ] || fails=$((fails + 1))
@@ -152,7 +177,7 @@ echo
 echo "External links"
 # A renamed repository or a moved page leaves a dead link nothing else would notice.
 for url in $(grep -hoE '<a [^>]*href="https://[^"]+' $(printf "$SITE/%s " $PAGES) \
-              | grep -oE 'https://[^"]+' | sort -u); do
+              | grep -oE 'https://[^"]+' | sed 's/&amp;/\&/g' | sort -u); do
     code="$(curl -s -o /dev/null -w '%{http_code}' -L --max-time 20 "$url")"
     # curl already reports 000 when it cannot connect. Once is the network
     # having a moment; twice is a domain that is not there.
@@ -168,7 +193,7 @@ done
 
 echo
 if [ "$fails" -eq 0 ]; then
-    echo "site/ is good."
+    echo "site/dist is good."
 else
     echo "$fails check(s) failed."
 fi

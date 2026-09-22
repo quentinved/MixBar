@@ -1,0 +1,40 @@
+---
+import "../styles/global.css";
+// The same file global.css names, so it comes out of the build under one
+// hash; preloading it is what stops the headline repainting in a fallback face.
+import inter from "../../node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  path?: string;
+  noindex?: boolean;
+}
+
+const { title, description, path = "/", noindex = false } = Astro.props;
+const canonical = new URL(path, Astro.site).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex, follow" /> : <link rel="canonical" href={canonical} />}
+    <meta name="theme-color" content="#0c0a14" />
+    <link rel="icon" href="/mark.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/mark-1024.png" />
+    <link rel="preload" href={inter} as="font" type="font/woff2" crossorigin />
+    <slot name="head" />
+  </head>
+  <body>
+    <div class="progress" aria-hidden="true"></div>
+    <Nav />
+    <slot />
+    <Footer />
+  </body>
+</html>

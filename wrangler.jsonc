@@ -1,17 +1,29 @@
-// Workers Builds runs `wrangler versions upload` from the repository root with
-// no arguments, so without this file the deploy fails with "Missing entry-point
-// to Worker script or to assets directory".
+// Workers Builds runs `wrangler deploy` with no arguments, so without this
+// file the deploy fails with "Missing entry-point to Worker script or to
+// assets directory". It runs from site/, where it found a package.json, and
+// wrangler finds this file by walking up; asset paths resolve against this
+// file, but the build command runs in whatever the working directory is.
 {
   // Must match the Worker in the Cloudflare dashboard, or the upload silently
   // lands on a second Worker that no custom domain points at.
   "name": "mixbar",
   "compatibility_date": "2026-09-18",
-  // The page is static files, so there is no script: the assets are the Worker.
-  // _headers and _redirects live inside this directory and are applied from it.
+  // The page is built by Astro from site/src. wrangler runs this before every
+  // deploy, so the dashboard needs no build command of its own, and `wrangler
+  // dev` runs it again whenever a source file changes. It finds site/ by
+  // looking for it, because the working directory differs between the
+  // dashboard, `wrangler dev` and a dry run, and depends on nothing being
+  // installed in the build image beyond npm itself.
+  "build": {
+    "command": "if [ -f site/package.json ]; then cd site; fi && { test -d node_modules || npm ci --no-audit --no-fund; } && npm run build",
+    "watch_dir": "site/src"
+  },
+  // There is no script: the built assets are the Worker. _headers and
+  // _redirects come out of site/public and are applied from inside dist.
   "assets": {
-    "directory": "./site",
+    "directory": "./site/dist",
     // Default is a bare 404 body, which reads to a crawler as a soft 404 on
-    // every mistyped URL. This serves site/404.html with the 404 status intact.
+    // every mistyped URL. This serves the built 404.html with the status intact.
     "not_found_handling": "404-page"
   }
 }

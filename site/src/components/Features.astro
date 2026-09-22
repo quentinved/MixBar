@@ -1,0 +1,356 @@
+---
+import { links } from "../data/links";
+---
+
+<section class="section" id="features">
+  <div class="wrap">
+    <div class="section__head reveal">
+      <p class="eyebrow">Features</p>
+      <h2>Everything a mixer needs. Nothing a menu bar can't hold.</h2>
+      <p class="lede">
+        Click the slider icon in the menu bar. Apps appear as they start making sound, and
+        disappear from your audio path the moment you put them back at 100%.
+      </p>
+    </div>
+
+    <div class="bento">
+      <article class="card feature feature--wide reveal">
+        <div class="feature__art art-rows" aria-hidden="true">
+          <div class="art-row"><i class="art-tile"></i><b>Music</b><span class="art-fader"><i></i><em></em></span><small>78%</small></div>
+          <div class="art-row"><i class="art-tile"></i><b>Discord</b><span class="art-fader"><i></i><em></em></span><small>34%</small></div>
+          <div class="art-row is-muted"><i class="art-tile"></i><b>Teams</b><span class="art-fader"><i></i><em></em></span><small>0%</small></div>
+        </div>
+        <h3>One slider per app</h3>
+        <p>
+          Drag it, or click anywhere on the track to jump there. Mute with the speaker icon, and
+          the old level comes back when you unmute.
+        </p>
+      </article>
+
+      <article class="card feature reveal">
+        <div class="feature__art art-meter" aria-hidden="true">
+          <span class="art-meter__track"><i></i><em></em></span>
+          <span class="art-meter__labels"><span>signal</span><span>gain</span></span>
+        </div>
+        <h3>Meters that tell the truth</h3>
+        <p>
+          The band inside each slider is the signal after your gain is applied. What you see is
+          what is reaching your speakers.
+        </p>
+      </article>
+
+      <article class="card feature reveal">
+        <div class="feature__art art-devices" aria-hidden="true">
+          <div class="is-on"><b>MacBook Pro Speakers</b><small>Built‑in</small></div>
+          <div><b>AirPods Pro</b><small>Bluetooth</small></div>
+          <div><b>Studio Display</b><small>Displays</small></div>
+        </div>
+        <h3>Output, one click away</h3>
+        <p>
+          Click the device name to switch. Devices are grouped by what they are, nearest thing
+          first: built‑in, headphones, Bluetooth, AirPlay, displays, external, virtual.
+        </p>
+      </article>
+
+      <article class="card feature reveal">
+        <div class="feature__art art-group" aria-hidden="true">
+          <div class="art-group__app"><i class="art-tile"></i>Arc</div>
+          <div class="art-group__helpers"><span>helper</span><span>helper</span><span>helper</span></div>
+          <span class="art-fader"><i></i><em></em></span>
+        </div>
+        <h3>Browsers can't slip out</h3>
+        <p>
+          Netflix in Arc plays through a helper process, and there is more than one. One tap spans
+          all of an app's processes, so muting the app mutes the app.
+        </p>
+      </article>
+
+      <article class="card feature reveal">
+        <div class="feature__art art-memory" aria-hidden="true">
+          <code>com.spotify.client</code><span>→</span><b>62%</b>
+        </div>
+        <h3>Remembered per app</h3>
+        <p>
+          Volumes are stored by bundle ID, so quitting Spotify and reopening it keeps the level
+          you set. Settings survive a restart.
+        </p>
+      </article>
+
+      <article class="card card--accent feature feature--wide feature--statement reveal">
+        <h3>Nothing in your audio path until you ask.</h3>
+        <p>
+          At default volume MixBar creates no taps and no aggregate device. An app enters the
+          path only once its slider moves, and leaves the moment it returns to 100%. An earlier
+          version routed everything through the mixer and caused audible crackling system‑wide,
+          even while mixing pure silence.
+        </p>
+      </article>
+
+      <article class="card feature reveal">
+        <div class="feature__art art-open" aria-hidden="true">
+          <span>MIT</span><span>Swift</span><span>0 deps</span>
+        </div>
+        <h3>Open, and small</h3>
+        <p>
+          No dependencies, no account, no telemetry. The part that touches your audio
+          is <a href={links.mixer}>one file</a> you can read in an afternoon.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<style>
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .feature {
+    grid-column: span 2;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    overflow: hidden;
+    transition: border-color 0.2s ease;
+  }
+  .feature:hover {
+    border-color: rgba(167, 155, 247, 0.35);
+  }
+  .feature--wide {
+    grid-column: span 4;
+  }
+  .feature h3 {
+    margin-top: auto;
+  }
+  .feature p {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 0.9375rem;
+    text-wrap: pretty;
+  }
+  .feature--statement {
+    justify-content: center;
+  }
+  .feature--statement h3 {
+    margin-top: 0;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    letter-spacing: -0.03em;
+  }
+  .feature--statement p {
+    max-width: 40rem;
+    color: var(--ink-2);
+  }
+
+  /* --- illustrations, all CSS: the point is they are made of the same
+     primitives as the demo, not screenshots of them --- */
+  .feature__art {
+    min-height: 120px;
+    margin-bottom: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    font-size: 0.8125rem;
+    color: var(--ink-2);
+  }
+  .art-tile {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: var(--brand);
+    opacity: 0.9;
+  }
+  .art-fader {
+    --gain: 0.78;
+    --level: 0.5;
+    position: relative;
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .art-fader i,
+  .art-fader em {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 3px;
+  }
+  .art-fader i {
+    width: calc(var(--gain) * 100%);
+    background: linear-gradient(90deg, var(--brand-indigo), var(--brand-violet));
+  }
+  .art-fader em {
+    width: calc(var(--level) * 100%);
+    background: rgba(255, 255, 255, 0.55);
+    mix-blend-mode: screen;
+  }
+  .art-fader::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: calc(var(--gain) * 100%);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    transform: translate(-50%, -50%);
+  }
+
+  .art-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .art-row b {
+    width: 60px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .art-row small {
+    width: 32px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .art-row:nth-child(2) .art-fader { --gain: 0.34; --level: 0.25; }
+  .art-row.is-muted { color: var(--muted); }
+  .art-row.is-muted b { color: var(--muted); }
+  .art-row.is-muted .art-fader { --gain: 0; --level: 0; }
+  .art-row.is-muted .art-fader::after { background: #8d8a98; }
+
+  .art-meter__track {
+    --gain: 0.72;
+    --level: 0.46;
+    position: relative;
+    display: block;
+    height: 14px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .art-meter__track i,
+  .art-meter__track em {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: 7px;
+  }
+  .art-meter__track i {
+    width: calc(var(--gain) * 100%);
+    background: linear-gradient(90deg, var(--brand-indigo), var(--brand-violet));
+  }
+  .art-meter__track em {
+    width: calc(var(--level) * 100%);
+    background: rgba(255, 255, 255, 0.6);
+    mix-blend-mode: screen;
+  }
+  .art-meter__labels {
+    display: flex;
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .art-meter__labels span:first-child {
+    width: 46%;
+  }
+  .art-meter__labels span:last-child {
+    width: 26%;
+    text-align: right;
+  }
+
+  .art-devices {
+    gap: 4px;
+  }
+  .art-devices div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 7px 12px;
+    border-radius: 8px;
+  }
+  .art-devices b {
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .art-devices small {
+    color: var(--muted);
+  }
+  .art-devices .is-on {
+    background: rgba(107, 92, 242, 0.22);
+    box-shadow: inset 0 0 0 1px rgba(167, 155, 247, 0.35);
+  }
+
+  .art-group {
+    gap: 12px;
+  }
+  .art-group__app {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .art-group__helpers {
+    display: flex;
+    gap: 6px;
+    padding-left: 12px;
+    border-left: 2px solid var(--border);
+    margin-left: 12px;
+  }
+  .art-group__helpers span {
+    padding: 2px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    font-family: var(--mono);
+    font-size: 0.6875rem;
+    color: var(--muted);
+  }
+  .art-group .art-fader {
+    --gain: 0.5;
+    --level: 0.3;
+    flex: 0 0 auto;
+  }
+
+  .art-memory {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.875rem;
+  }
+  .art-memory b {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .art-open {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .art-open span {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--hairline);
+    background: var(--film);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--ink);
+  }
+
+  @media (max-width: 62rem) {
+    .feature,
+    .feature--wide {
+      grid-column: span 3;
+    }
+  }
+  @media (max-width: 40rem) {
+    .feature,
+    .feature--wide {
+      grid-column: span 6;
+    }
+  }
+</style>

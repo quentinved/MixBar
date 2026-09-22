@@ -1,0 +1,86 @@
+---
+import { faq } from "../data/faq";
+---
+
+<section class="section" id="faq">
+  <div class="wrap faq">
+    <div class="section__head reveal">
+      <p class="eyebrow">Questions</p>
+      <h2>The ones that get asked.</h2>
+    </div>
+
+    <div class="faq__list reveal">
+      {
+        faq.map((item) => (
+          <details>
+            <summary>{item.question}</summary>
+            <p set:html={item.answer} />
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .faq {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+    gap: 40px;
+  }
+  .faq .section__head {
+    margin-bottom: 0;
+  }
+  .faq__list {
+    border-top: 1px solid var(--hairline);
+  }
+  details {
+    border-bottom: 1px solid var(--hairline);
+  }
+  summary {
+    position: relative;
+    padding: 18px 40px 18px 0;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+    transition: color 0.15s ease;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::after {
+    content: "";
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    width: 9px;
+    height: 9px;
+    border-right: 2px solid var(--muted);
+    border-bottom: 2px solid var(--muted);
+    transform: translateY(-70%) rotate(45deg);
+    transition: transform 0.25s var(--ease-out);
+  }
+  details[open] summary::after {
+    transform: translateY(-30%) rotate(-135deg);
+  }
+  summary:hover {
+    color: var(--brand-light);
+  }
+  details p {
+    padding: 0 0 20px;
+    max-width: 40rem;
+    color: var(--muted);
+    text-wrap: pretty;
+  }
+  details :global(strong) {
+    color: var(--ink-2);
+    font-weight: 600;
+  }
+
+  @media (max-width: 62rem) {
+    .faq {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+</style>
