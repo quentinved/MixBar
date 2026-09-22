@@ -77,7 +77,11 @@ PKG="$ROOT/build/MixBar-$VERSION.pkg"
 for ARTIFACT in "$DMG" "$PKG"; do
     [ -f "$ARTIFACT" ] || continue
     echo "submitting $(basename "$ARTIFACT") for notarization…"
-    xcrun notarytool submit "$ARTIFACT" "${NOTARY_AUTH[@]}" --wait
+    # --wait on its own blocks for as long as Apple takes. A notary backlog
+    # then runs out the six-hour job limit and the release is reported as
+    # cancelled, which reads like someone pressed the button. Give up while the
+    # log still says why; the submission keeps processing at Apple either way.
+    xcrun notarytool submit "$ARTIFACT" "${NOTARY_AUTH[@]}" --wait --timeout 45m
     xcrun stapler staple "$ARTIFACT"
     xcrun stapler validate "$ARTIFACT"
 done
