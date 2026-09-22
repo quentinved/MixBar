@@ -1,0 +1,7 @@
+# Everything here is public. The only rule that matters is the sitemap line:
+# it is what tells a crawler the canonical apex URL, which /download and
+# /github are not — those are redirects out to GitHub.
+User-agent: *
+Allow: /
+
+Sitemap: https://mixbar.quentinvedrenne.com/sitemap.xml
