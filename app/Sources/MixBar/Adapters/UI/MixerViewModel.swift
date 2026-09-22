@@ -101,9 +101,26 @@ final class MixerViewModel: ObservableObject {
     /// Taps are gated by `kTCCServiceAudioCapture`, which System Settings shows
     /// as `Privacy_AudioCapture`, and it is not Microphone: a different permission.
     func openPrivacySettings() {
-        let url = URL(
-            string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AudioCapture")
-        if let url { NSWorkspace.shared.open(url) }
+        open("x-apple.systempreferences:com.apple.preference.security?Privacy_AudioCapture")
+    }
+
+    func reportBug() {
+        open("https://github.com/quentinved/MixBar/issues/new?template=bug_report.yml")
+    }
+
+    /// The version goes in the subject because it is the detail people leave
+    /// out, and an audio bug without it says nothing.
+    func emailDeveloper() {
+        let version = Bundle.main
+            .object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
+        let subject = "MixBar \(version) bug report"
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "MixBar"
+        open("mailto:contact@quentinvedrenne.com?subject=\(subject)")
+    }
+
+    private func open(_ string: String) {
+        guard let url = URL(string: string) else { return }
+        NSWorkspace.shared.open(url)
     }
 
     /// The bundle fallback matters when the process is gone but the row is

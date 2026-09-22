@@ -33,7 +33,8 @@ Per-app volume for macOS. A slider in your menu bar for every app that's making 
 Everything else — the taps, the empty audio path, the permission — is what the
 README is for. The description's only job is to get someone to open it.
 
-**Website:** `https://mixbar.app` (or the `*.pages.dev` URL until the domain is live).
+**Website:** `https://mixbar.quentinvedrenne.com` (or the `*.workers.dev` URL until the
+custom domain is attached).
 
 **Topics** — add all of these; topic pages are a real discovery channel:
 
@@ -79,8 +80,7 @@ Settings → Actions → General.
 - **Workflow permissions: Read repository contents**. `release.yml` requests the
   write scope it needs in the workflow file itself, so the default stays narrow.
 - Leave **Allow all actions** unless you want to pin an allowlist; the workflows
-  use `actions/checkout`, `softprops/action-gh-release` and
-  `cloudflare/wrangler-action`.
+  use `actions/checkout` and `softprops/action-gh-release`.
 
 ### Secrets and variables
 
@@ -93,9 +93,6 @@ Settings → Secrets and variables → Actions.
 | `NOTARY_KEY_P8_BASE64` | Secret | Release | App Store Connect → Users and Access → Integrations → Keys. **Downloadable once only** → `base64 -i AuthKey_XXX.p8 \| pbcopy` |
 | `NOTARY_KEY_ID` | Secret | Release | Shown next to the key |
 | `NOTARY_ISSUER_ID` | Secret | Release | Same page, above the key list |
-| `CLOUDFLARE_API_TOKEN` | Secret | Site | Cloudflare → My Profile → API Tokens → **Cloudflare Pages: Edit** |
-| `CLOUDFLARE_ACCOUNT_ID` | Secret | Site | Cloudflare dashboard URL, or the right-hand column of the account home |
-| `CLOUDFLARE_PROJECT` | **Variable** | Site | The Pages project name, e.g. `mixbar`. `site.yml` skips entirely while this is unset |
 
 ## 5. Branch protection
 
@@ -103,7 +100,9 @@ Settings → Rules → Rulesets → New branch ruleset, targeting `main`:
 
 - Require a pull request before merging (1 approval — set to 0 while you are the
   only maintainer, so you are not blocked on yourself)
-- **Require status checks to pass** → add the `test` job from `Test`
+- **Require status checks to pass** → add the `test` job from `Test`. Add the
+  `links` job too once `SLACK_INVITE_URL` in the README is a real invite —
+  until then it fails on purpose, so requiring it would block every merge
 - Require branches to be up to date before merging
 - Block force pushes
 
@@ -127,23 +126,32 @@ Tag the four unbuilt features from the README's Status section as
 `good first issue` + `help wanted` the day you go public. An empty issue tracker
 gives a visitor nothing to do.
 
-## 7. Cloudflare Pages
+## 7. Cloudflare
 
-Deployed from Cloudflare's own Git integration, which needs no GitHub secrets:
+The page is a Worker whose whole deployment is static assets: `wrangler.jsonc`
+at the repository root points `assets.directory` at `site/`, and there is no
+build step and no script. Deployed from Cloudflare's own Git integration, which
+needs no GitHub secrets:
 
-1. Cloudflare dashboard → **Workers & Pages** → Create → **Pages** → Connect to Git.
+1. Cloudflare dashboard → **Workers & Pages** → Create → **Import a repository**.
 2. Authorise GitHub and pick the `MixBar` repository.
-3. Build settings: **Framework preset** None, **Build command** empty,
-   **Build output directory** `site`. Leave the root directory alone.
-4. Deploy. You land on `mixbar.pages.dev`, and every PR gets a preview URL.
-5. Settings → **Builds & deployments** → **Build watch paths** → set *Include
-   paths* to `site/*`. Without this a Swift-only commit still triggers a rebuild
-   and a new deployment, which makes the deployment list useless for working out
-   when the page last actually changed.
+3. **Name the Worker `mixbar`**, matching `name` in `wrangler.jsonc`. A mismatch
+   does not fail the build — it uploads to a second Worker that no custom domain
+   points at, and the deploy looks green while the page never changes.
+4. Build settings: **Build command** empty, **Deploy command** `npx wrangler
+   deploy` — Cloudflare uses `npx wrangler versions upload` for non-production
+   branches by itself. Leave the root directory alone.
+5. Deploy. You land on `mixbar.<subdomain>.workers.dev`, and every branch gets a
+   preview version URL.
+6. Settings → **Build** → **Build watch paths** → set *Include paths* to
+   `site/*` and `wrangler.jsonc`. Without this a Swift-only commit still
+   triggers a rebuild and a new version, which makes the deployment list useless
+   for working out when the page last actually changed.
 
 `site/_redirects` then makes `/download` always point at the newest GitHub
 release, so the download button never needs touching on a version bump.
-`site/_headers` sets the CSP and cache policy.
+`site/_headers` sets the CSP and cache policy. Both are read from inside the
+assets directory, so they only work while they sit in `site/`.
 
 **Cloudflare does not wait for GitHub Actions.** A push to `main` deploys whether
 or not the `check` job in `site.yml` passed, so that job reports rather than
@@ -151,16 +159,12 @@ gates. The gate is §5's branch protection: require the `check` status on pull
 requests and merge only through them, and `main` is never broken in the first
 place.
 
-**Custom domain:** Pages project → Custom domains → add `mixbar.app`. If the
-domain is registered with Cloudflare the records are created for you; otherwise
-add the `CNAME` they display. Until then the page's `canonical`, `og:url` and
-`og:image` all hard-code `https://mixbar.app/`, so launching on `*.pages.dev`
-first means changing those three or shipping dead link previews. Then update the
-About panel's Website field.
-
-If you would rather deploy from CI instead, set the three Cloudflare entries in
-the table above and the `deploy` job in `.github/workflows/site.yml` takes over —
-it gates on `check`, but you lose PR previews.
+**Custom domain:** Worker → Settings → **Domains & Routes** → Add custom domain
+→ `mixbar.quentinvedrenne.com`. The zone is already on Cloudflare, so the
+records are created for you. The page hard-codes that host in `canonical`,
+`og:url`, `og:image`, `robots.txt` and `sitemap.xml`: a canonical pointing at a
+host that does not resolve keeps the real URL out of the index, so if the domain
+ever moves, all five move with it. Then update the About panel's Website field.
 
 ## 8. Release
 
