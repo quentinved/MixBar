@@ -24,7 +24,16 @@ const canonical = new URL(path, Astro.site).href;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    {noindex ? <meta name="robots" content="noindex, follow" /> : <link rel="canonical" href={canonical} />}
+    {
+      noindex ? (
+        <meta name="robots" content="noindex, follow" />
+      ) : (
+        <>
+          <link rel="canonical" href={canonical} />
+          <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+        </>
+      )
+    }
     <meta name="theme-color" content="#0c0a14" />
     <link rel="icon" href="/mark.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/mark-1024.png" />

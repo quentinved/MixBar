@@ -1,5 +1,6 @@
 ---
 import { links } from "../data/links";
+import { version } from "../data/repo";
 ---
 
 <section class="section" id="get">
@@ -17,7 +18,8 @@ import { links } from "../data/links";
           <a class="button" href={links.repo}>View the source</a>
         </div>
         <p class="get__fine">
-          Requires macOS 15 or later · Apple silicon and Intel · Signed and notarized · MIT
+          Version {version} · macOS 15 or later · Apple silicon and Intel ·
+          <a href={links.latest}>Release notes</a>
         </p>
       </div>
       <img class="get__mark" src="/mark.svg" width="180" height="180" alt="" />

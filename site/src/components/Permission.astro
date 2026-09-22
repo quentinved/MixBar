@@ -14,9 +14,8 @@ import { links } from "../data/links";
           though it never touches your microphone.
         </p>
         <p>
-          You do not have to take that on faith. There is no network code in the app, and the
-          part that handles your audio is <a href={links.mixer}>one file</a>: it multiplies
-          buffers by a gain, sums them, and writes them to your output device.
+          You do not have to take that on faith: the part that handles your audio is
+          <a href={links.mixer}>one file</a>, and the app has no network code at all.
         </p>
       </div>
       <dl class="permission__facts">

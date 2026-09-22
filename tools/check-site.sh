@@ -50,6 +50,14 @@ for page in $PAGES; do
         pass "$page: every script is a hashed file under /_astro/"
     fi
 done
+# img-src is 'self', which excludes data: URIs, CSS masks and backgrounds
+# included. They render in any preview that lacks the header and nowhere else,
+# which is how the demo's app icons went blank in production.
+if grep -qE 'url\(["'"'"']?data:' "$SITE"/_astro/*.css $(printf "$SITE/%s " $PAGES); then
+    fail "a stylesheet or page loads a data: URI; img-src is 'self'"
+else
+    pass "no data: URIs for the CSP to block"
+fi
 # Only subresources are governed by the CSP: a <link> or a src=, never an <a>.
 # rel="canonical" names the site's own origin and fetches nothing.
 canonical="$(grep -oE 'rel="canonical" href="https://[a-z.]+' "$HTML" | sed 's|.*https://||')"
