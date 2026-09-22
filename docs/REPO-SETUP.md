@@ -142,8 +142,11 @@ Deployed from Cloudflare's own Git integration, which needs no GitHub secrets:
 4. Build settings: **Build command** empty (wrangler runs the one in
    `wrangler.jsonc`), **Deploy command** `npx wrangler deploy` — Cloudflare uses
    `npx wrangler versions upload` for non-production branches by itself. Leave
-   the root directory alone: the config is at the repository root, and the build
-   reads `app/Info.plist` and `app/Tests/` for the numbers the page quotes.
+   the root directory alone: Cloudflare picks `site/` by itself, because that is
+   where the `package.json` is, installs the site's dependencies there, and
+   wrangler finds `wrangler.jsonc` in the parent. The build command looks for
+   `site/` rather than assuming a working directory, so it works from either. The build reads `app/Info.plist` and `app/Tests/` for the
+   numbers the page quotes.
 5. Deploy. You land on `mixbar.<subdomain>.workers.dev`, and every branch gets a
    preview version URL.
 6. Settings → **Build** → **Build watch paths** → set *Include paths* to
