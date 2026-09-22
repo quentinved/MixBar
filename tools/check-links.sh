@@ -9,6 +9,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 python3 - "$ROOT" <<'PY'
 import glob, os, re, subprocess, sys
+from urllib.parse import urlparse
 
 root = sys.argv[1]
 os.chdir(root)
@@ -17,6 +18,13 @@ os.chdir(root)
 # here is what stops one shipping as a link that quietly 404s.
 PLACEHOLDERS = {
     "SLACK_INVITE_URL": "the Slack workspace has not been created yet",
+}
+
+# Hosts that refuse datacenter traffic answer a runner with 000 and a browser
+# with 200, which is the same signal a dead domain gives. Naming the few keeps
+# the check honest about the rest rather than making every 000 a warning.
+BLOCKS_CI = {
+    "rogueamoeba.com": "blocks CI egress; reachable by hand",
 }
 
 fails = 0
@@ -80,7 +88,12 @@ for url in sorted(remote):
     # rate-limiting CI, which is not a broken link.
     if code == "000":
         code = status(url)
-    if code == "200" or code == "429" or code.startswith("5"):
+    host = urlparse(url).hostname or ""
+    blocked = next((h for h in BLOCKS_CI
+                    if host == h or host.endswith("." + h)), None)
+    if code == "000" and blocked:
+        pass_(f"000 {url}  ({BLOCKS_CI[blocked]})")
+    elif code == "200" or code == "429" or code.startswith("5"):
         pass_(f"{code} {url}")
     else:
         fail(f"{code} {url}  ({', '.join(sorted(remote[url]))})")
