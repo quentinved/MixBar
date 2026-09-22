@@ -17,6 +17,7 @@
     "typescript": "6.0.3"
   },
   "devDependencies": {
+    "@types/node": "24.13.6",
     "wrangler": "4.136.2"
   }
 }
