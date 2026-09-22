@@ -3,20 +3,62 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MixBar — Per-app volume for Mac</title>
-<meta name="description" content="A slider for every app that's making noise, in your Mac's menu bar, plus quick output switching. Free and open source.">
-<meta name="theme-color" content="#6B5CF2" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0C0A14" media="(prefers-color-scheme: dark)">
-<link rel="canonical" href="https://mixbar.app/">
+<title>MixBar — Per-app volume mixer for macOS</title>
+<meta name="description" content="Per-app volume control for macOS: a slider for every app that's making noise, right in the menu bar, plus quick output-device switching. Free and open source.">
+<meta name="theme-color" content="#07060C">
+<link rel="canonical" href="https://mixbar.quentinvedrenne.com/">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="MixBar — Per-app volume for Mac">
+<meta property="og:site_name" content="MixBar">
+<meta property="og:locale" content="en">
+<meta property="og:title" content="MixBar — Per-app volume mixer for macOS">
 <meta property="og:description" content="A slider for every app that's making noise, in your Mac's menu bar. Free and open source.">
-<meta property="og:url" content="https://mixbar.app/">
-<meta property="og:image" content="https://mixbar.app/og.png">
+<meta property="og:url" content="https://mixbar.quentinvedrenne.com/">
+<meta property="og:image" content="https://mixbar.quentinvedrenne.com/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="MixBar: the menu-bar popover, with a volume slider for each app that is playing.">
 <meta name="twitter:card" content="summary_large_image">
+
+<!-- A data block, not a script: the HTML parser never executes it, so the
+     default-src 'none' CSP leaves it alone and crawlers still read it. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "MixBar",
+  "url": "https://mixbar.quentinvedrenne.com/",
+  "description": "Per-app volume control for macOS: a slider for every app that's making noise, right in the menu bar, plus quick output-device switching.",
+  "applicationCategory": "UtilitiesApplication",
+  "applicationSubCategory": "Audio",
+  "operatingSystem": "macOS 15 or later",
+  "processorRequirements": "Apple silicon or Intel",
+  "downloadUrl": "https://github.com/quentinved/MixBar/releases/latest",
+  "softwareHelp": "https://github.com/quentinved/MixBar#readme",
+  "license": "https://opensource.org/licenses/MIT",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "image": "https://mixbar.quentinvedrenne.com/og.png",
+  "screenshot": [
+    "https://mixbar.quentinvedrenne.com/shots/comfortable-dark.png",
+    "https://mixbar.quentinvedrenne.com/shots/compact-dark.png",
+    "https://mixbar.quentinvedrenne.com/shots/mixer-dark.png"
+  ],
+  "featureList": [
+    "Per-app volume and mute",
+    "Live per-app level meters",
+    "Output device switching",
+    "Volume remembered per app",
+    "Helper-process grouping for browsers and Electron apps"
+  ],
+  "author": {
+    "@type": "Person",
+    "name": "Quentin Vedrenne",
+    "url": "https://quentinvedrenne.com"
+  },
+  "sameAs": "https://github.com/quentinved/MixBar"
+}
+</script>
 
 <link rel="icon" href="/mark.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/mark-1024.png">
@@ -31,7 +73,8 @@
 <div class="progress" aria-hidden="true"></div>
 
 <header class="hero">
-  <img class="hero__mark" src="/mark.svg" width="104" height="104" alt="">
+ <div class="hero__copy">
+  <img class="hero__mark" src="/mark.svg" width="88" height="88" alt="">
   <h1 class="hero__name">MixBar</h1>
   <p class="hero__tagline">Per-app volume for Mac.</p>
   <p class="hero__sub">
@@ -49,82 +92,30 @@
   <p class="hero__meta">
     Requires macOS 15 or later · Apple silicon and Intel · MIT licensed
   </p>
+ </div>
+
+ <!-- The real popover, captured at 2x by tools/screenshot.sh and declared at
+      half size, so the app icons are the apps' own rather than stand-ins. -->
+ <div class="hero__art">
+  <div class="shot__stage">
+   <img class="shot__img" src="/shots/comfortable-dark.png"
+        width="320" height="453" fetchpriority="high"
+        alt="The MixBar popover, open: a volume slider and live level meter for Arc, Discord, Microsoft Teams, Music, Spotify, VLC and Podcasts, with the output device named at the top.">
+  </div>
+ </div>
+
+ <a class="hero__more" href="#more" aria-label="Read on">
+   <span class="hero__chevron" aria-hidden="true"></span>
+ </a>
 </header>
 
 <main>
 
-  <!-- A living stand-in for the popover, not a capture of it: the real thing is
-       in "Three ways to see it" below. Pure CSS — the CSP allows no scripts. -->
-  <section class="shot">
-    <div class="shot__stage">
-      <div class="panel" role="img"
-           aria-label="The MixBar popover, open: a volume slider for Arc, Discord, Microsoft Teams, Music, Spotify and VLC, each with a live level meter, and the output device named at the top.">
-        <div class="panel__head">
-          <span class="panel__title">MixBar</span>
-          <span class="panel__device">MacBook Pro Speakers</span>
-        </div>
-        <ul class="mix">
-        <li class="mix__row mix__row--arc">
-          <span class="mix__icon"></span>
-          <span class="mix__name">Arc</span>
-          <span class="mix__pct">100%</span>
-          <span class="mix__track">
-            <span class="mix__fill"><span class="mix__meter"></span></span>
-            <span class="mix__knob"></span>
-          </span>
-        </li>
-        <li class="mix__row mix__row--discord">
-          <span class="mix__icon"></span>
-          <span class="mix__name">Discord</span>
-          <span class="mix__pct">34%</span>
-          <span class="mix__track">
-            <span class="mix__fill"><span class="mix__meter"></span></span>
-            <span class="mix__knob"></span>
-          </span>
-        </li>
-        <li class="mix__row mix__row--teams">
-          <span class="mix__icon"></span>
-          <span class="mix__name">Microsoft Teams</span>
-          <span class="mix__pct">0%</span>
-          <span class="mix__track">
-            <span class="mix__fill"><span class="mix__meter"></span></span>
-            <span class="mix__knob"></span>
-          </span>
-        </li>
-        <li class="mix__row mix__row--music">
-          <span class="mix__icon"></span>
-          <span class="mix__name">Music</span>
-          <span class="mix__pct">78%</span>
-          <span class="mix__track">
-            <span class="mix__fill"><span class="mix__meter"></span></span>
-            <span class="mix__knob"></span>
-          </span>
-        </li>
-        <li class="mix__row mix__row--spotify">
-          <span class="mix__icon"></span>
-          <span class="mix__name">Spotify</span>
-          <span class="mix__pct">62%</span>
-          <span class="mix__track">
-            <span class="mix__fill"><span class="mix__meter"></span></span>
-            <span class="mix__knob"></span>
-          </span>
-        </li>
-        <li class="mix__row mix__row--vlc">
-          <span class="mix__icon"></span>
-          <span class="mix__name">VLC</span>
-          <span class="mix__pct">88%</span>
-          <span class="mix__track">
-            <span class="mix__fill"><span class="mix__meter"></span></span>
-            <span class="mix__knob"></span>
-          </span>
-        </li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <h2>It stays out of your audio path until you ask</h2>
+  <section class="section section--statement" id="more">
+    <h2 class="statement">
+      <span>Nothing</span> <span>in</span> <span>your</span> <span>audio</span>
+      <span>path</span> <span>until</span> <span>you</span> <span>ask.</span>
+    </h2>
     <p class="lede">
       At default volume MixBar creates nothing at all — no taps, no aggregate
       device, no presence between your apps and your speakers. An app enters the
@@ -140,34 +131,21 @@
   </section>
 
   <section class="section section--wide">
-    <h2>Three ways to see it</h2>
+    <h2>Two more ways to see it</h2>
     <p class="lede">
-      The same mixer, at three densities. Two apps or twenty, the panel is meant
-      to be read at a glance and closed again.
+      The panel above is the comfortable layout. The same mixer also folds down
+      to one line per app, or stands up as a row of faders. Two apps or twenty,
+      it is meant to be read at a glance and closed again.
     </p>
     <div class="layouts">
       <figure>
-        <picture>
-          <source srcset="/shots/compact-dark.png" media="(prefers-color-scheme: dark)">
-          <img src="/shots/compact.png" width="320" height="294" loading="lazy"
-               alt="The compact layout: one line per app, name and slider on the same row.">
-        </picture>
+        <img src="/shots/compact-dark.png" width="320" height="294" loading="lazy"
+             alt="The compact layout: one line per app, name and slider on the same row.">
         <figcaption><strong>Compact</strong> — one line per app.</figcaption>
       </figure>
       <figure>
-        <picture>
-          <source srcset="/shots/comfortable-dark.png" media="(prefers-color-scheme: dark)">
-          <img src="/shots/comfortable.png" width="320" height="453" loading="lazy"
-               alt="The comfortable layout: each app gets an icon, its name and a full-width slider.">
-        </picture>
-        <figcaption><strong>Comfortable</strong> — icon, name, full slider.</figcaption>
-      </figure>
-      <figure>
-        <picture>
-          <source srcset="/shots/mixer-dark.png" media="(prefers-color-scheme: dark)">
-          <img src="/shots/mixer.png" width="458" height="300" loading="lazy"
-               alt="The mixer layout: vertical faders side by side, like a mixing desk.">
-        </picture>
+        <img src="/shots/mixer-dark.png" width="458" height="300" loading="lazy"
+             alt="The mixer layout: vertical faders side by side, like a mixing desk.">
         <figcaption><strong>Mixer</strong> — vertical faders, side by side.</figcaption>
       </figure>
     </div>
@@ -192,69 +170,6 @@
     </p>
   </section>
 
-  <section class="section">
-    <h2>How it works</h2>
-    <ol class="steps">
-      <li>
-        <h3>Find what's playing</h3>
-        <p>Enumerate audio processes through Core Audio's process objects.</p>
-      </li>
-      <li>
-        <h3>Group them by app</h3>
-        <p>
-          Browsers and Electron apps play through anonymous helpers, and there is
-          more than one — mute the wrong helper and the sound simply moves to the
-          next. One slider spans all of an app's processes.
-        </p>
-      </li>
-      <li>
-        <h3>Tap only what you adjusted</h3>
-        <p>
-          A private tap spanning that app's processes, marked muted&#8209;when&#8209;tapped
-          so its own path to the speakers goes quiet and MixBar's gain becomes
-          its volume.
-        </p>
-      </li>
-      <li>
-        <h3>Mix in one pass</h3>
-        <p>
-          The output device and every tap go into a single private aggregate
-          device, and one realtime IOProc applies the gains and sums the result.
-        </p>
-      </li>
-    </ol>
-  </section>
-
-  <section class="section">
-    <h2>Where it's at</h2>
-    <div class="status">
-      <div>
-        <h3>Working</h3>
-        <ul>
-          <li>Per-app volume and mute</li>
-          <li>Live meters</li>
-          <li>Output device switching</li>
-          <li>Settings remembered per app</li>
-          <li>Helper-process grouping</li>
-        </ul>
-      </div>
-      <div>
-        <h3>Not yet</h3>
-        <ul>
-          <li>Sleep and wake handling</li>
-          <li>Launch at login</li>
-          <li>Global hotkeys</li>
-          <li>Per-app output routing</li>
-        </ul>
-      </div>
-    </div>
-    <p class="note">
-      MixBar is pre&#8209;1.0 and the second column is where the
-      <a href="https://github.com/quentinved/MixBar/blob/main/CONTRIBUTING.md">contributions</a>
-      would help most.
-    </p>
-  </section>
-
   <section class="section section--end">
     <h2>Get it</h2>
     <div class="cta">
@@ -269,6 +184,8 @@
   <p>
     <a href="https://github.com/quentinved/MixBar">GitHub</a> ·
     <a href="https://github.com/quentinved/MixBar/releases">Releases</a> ·
+    <a href="https://github.com/quentinved/MixBar/issues/new?template=bug_report.yml">Report a bug</a> ·
+    <a href="mailto:contact@quentinvedrenne.com">Email</a> ·
     <a href="https://github.com/quentinved/MixBar/blob/main/LICENSE">MIT licence</a>
   </p>
   <p class="footer__made">

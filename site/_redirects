@@ -1,4 +1,6 @@
 # Always the newest release, so the link never needs updating on a version bump.
-/download   https://github.com/quentinved/MixBar/releases/latest   302
-/github     https://github.com/quentinved/MixBar                   302
-/source     https://github.com/quentinved/MixBar                   302
+# /download is the file itself, not the page listing it: MixBar.dmg is the copy
+# release.sh uploads under a name that does not carry the version.
+/download   https://github.com/quentinved/MixBar/releases/latest/download/MixBar.dmg   302
+/github     https://github.com/quentinved/MixBar                                       302
+/source     https://github.com/quentinved/MixBar                                       302

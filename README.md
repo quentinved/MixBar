@@ -153,16 +153,14 @@ problems go through [SECURITY.md](SECURITY.md), privately, not as a public issue
 
 ### Community
 
-- **Slack** — [join the workspace](SLACK_INVITE_URL), for setup questions, "does
-  this work on your machine" reports, and anything too small for an issue.
 - **[Issues](https://github.com/quentinved/MixBar/issues)** — bugs and feature
   requests, so they stay findable and get tracked.
 - **Email** — **contact@quentinvedrenne.com**, if you would rather not use
   GitHub at all.
 
-Audio bugs depend on hardware and on which apps were playing, so Slack is often
-the faster route to working out whether something is a bug or a local setup
-before it becomes an issue.
+Audio bugs depend on the hardware and on which apps were playing, so say which
+apps had sound, which output device was selected, and attach the debug log —
+those three are most of the diagnosis.
 
 The rest of this section is the detail behind that guide.
 
