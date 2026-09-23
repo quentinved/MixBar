@@ -29,6 +29,25 @@ struct AppIcon: View {
     }
 }
 
+/// Stands in for the meter at 100%, where MixBar is out of the app's audio
+/// path and has no level to read, only the fact that it is playing.
+struct PlayingBadge: View {
+    let size: CGFloat
+
+    var body: some View {
+        Image(systemName: "waveform")
+            .font(.system(size: size, weight: .semibold))
+            .foregroundStyle(Brand.start)
+            .symbolEffect(.variableColor.iterative, options: .repeating)
+            .help("Playing. At 100% MixBar stays out of this app's audio, so it has no level.")
+            .accessibilityLabel("Playing")
+    }
+}
+
+extension MixerSnapshot.Row {
+    var showsPlayingBadge: Bool { application.isPlaying && !isMetered }
+}
+
 struct MuteButton: View {
     let isMuted: Bool
     let size: CGFloat

@@ -81,13 +81,14 @@ final class DemoMixingEngine: AudioMixingEngine {
     }
 
     func takePeak(for id: AudioAppID) -> Float {
-        guard let app = DemoRoster.byID[id], app.isPlaying else { return 0 }
+        // Like the real engine: an app at 100% is not tapped, so has no level.
+        guard let app = DemoRoster.byID[id], app.isPlaying, let gain = gains[id] else { return 0 }
 
         let elapsed = Float(Date().timeIntervalSince(start))
         let swell = 0.58 + 0.42 * sin(elapsed * app.tempo + app.phase)
         let flutter = 0.84 + 0.16 * sin(elapsed * app.tempo * 5.3 + app.phase * 2)
 
-        let level = app.loudness * swell * flutter * (gains[id] ?? 1)
+        let level = app.loudness * swell * flutter * gain
         return min(max(level, 0), 1)
     }
 

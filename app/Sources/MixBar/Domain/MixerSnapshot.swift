@@ -7,6 +7,9 @@ struct MixerSnapshot: Equatable, Sendable {
         let mix: AppMix
 
         var id: AudioAppID { application.id }
+
+        /// Only a routed app has a tap to read a level from.
+        var isMetered: Bool { !mix.isDefault }
     }
 
     var rows: [Row] = []

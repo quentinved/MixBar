@@ -66,6 +66,18 @@ struct MixerServiceTests {
         #expect(engine.latest.isEmpty)
     }
 
+    @Test("An app at full volume has no meter, since nothing taps it")
+    func onlyRoutedAppsAreMetered() {
+        let catalog = FakeCatalog()
+        catalog.applications = [app("com.spotify.client")]
+        let service = makeService(catalog: catalog)
+
+        #expect(service.refresh().rows.map(\.isMetered) == [false])
+
+        service.setVolume(Volume(0.5), for: .bundle("com.spotify.client"))
+        #expect(service.refresh().rows.map(\.isMetered) == [true])
+    }
+
     @Test("Muting drives the gain to silence and remembers the slider")
     func mutingKeepsTheVolumeForLater() {
         let catalog = FakeCatalog()

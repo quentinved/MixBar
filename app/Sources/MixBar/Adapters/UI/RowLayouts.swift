@@ -12,14 +12,17 @@ struct CompactRow: View {
         HStack(spacing: 8) {
             AppIcon(image: controls.icon, size: 18, isMuted: row.mix.isMuted)
 
-            Text(row.application.name)
-                .font(.system(size: 11, weight: .medium))
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .foregroundStyle(row.mix.isMuted ? .secondary : .primary)
-                // Fixed, so the sliders line up into a column instead of
-                // stepping in and out with the length of each app's name.
-                .frame(width: 78, alignment: .leading)
+            HStack(spacing: 3) {
+                Text(row.application.name)
+                    .font(.system(size: 11, weight: .medium))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .foregroundStyle(row.mix.isMuted ? .secondary : .primary)
+                if row.showsPlayingBadge { PlayingBadge(size: 10) }
+            }
+            // Fixed, so the sliders line up into a column instead of
+            // stepping in and out with the length of each app's name.
+            .frame(width: 78, alignment: .leading)
 
             VolumeSlider(
                 volume: row.mix.volume.value,
@@ -59,6 +62,8 @@ struct ComfortableRow: View {
                         .font(.system(size: 12, weight: .medium))
                         .lineLimit(1)
                         .foregroundStyle(row.mix.isMuted ? .secondary : .primary)
+
+                    if row.showsPlayingBadge { PlayingBadge(size: 11) }
 
                     Spacer(minLength: 4)
 
@@ -104,10 +109,13 @@ struct ChannelStrip: View {
                 .frame(width: 26, height: 112)
                 .accessibilityLabel("\(row.application.name) volume")
 
-            Text("\(row.mix.percent)")
-                .font(.system(size: 10, weight: .semibold))
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
+            HStack(spacing: 2) {
+                if row.showsPlayingBadge { PlayingBadge(size: 10) }
+                Text("\(row.mix.percent)")
+                    .font(.system(size: 10, weight: .semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(.secondary)
+            }
 
             MuteButton(isMuted: row.mix.isMuted, size: 9, action: controls.onMute)
 
