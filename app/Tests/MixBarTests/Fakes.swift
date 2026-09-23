@@ -5,19 +5,25 @@ import Foundation
 /// whole of its behaviour is reachable without an audio device.
 final class FakeCatalog: AudioApplicationCatalog {
     var applications: [AudioApplication] = []
+    private(set) var onChange: (() -> Void)?
     func currentApplications() -> [AudioApplication] { applications }
+    func observeChanges(_ handler: @escaping () -> Void) { onChange = handler }
 }
 
 final class FakeEngine: AudioMixingEngine {
     /// Every gain map the core has asked for, in order.
     private(set) var applied: [[AudioAppID: Float]] = []
+    private(set) var playing: Set<AudioAppID> = []
     private(set) var didShutDown = false
     var peaks: [AudioAppID: Float] = [:]
     var failure: String?
 
     var latest: [AudioAppID: Float] { applied.last ?? [:] }
 
-    func apply(gains: [AudioAppID: Float]) { applied.append(gains) }
+    func apply(gains: [AudioAppID: Float], playing: Set<AudioAppID>) {
+        applied.append(gains)
+        self.playing = playing
+    }
     func takePeak(for id: AudioAppID) -> Float { peaks[id] ?? 0 }
     func shutdown() { didShutDown = true }
 }
@@ -28,6 +34,7 @@ final class FakeOutputs: AudioOutputDirectory {
     func availableOutputs() -> [AudioOutput] { outputs }
     func currentOutput() -> AudioOutput? { selected ?? outputs.first }
     func selectOutput(_ output: AudioOutput) throws { selected = output }
+    func observeChanges(_ handler: @escaping () -> Void) {}
 }
 
 final class FakeStore: MixSettingsStore {

@@ -77,5 +77,6 @@ struct VolumeSlider: View {
             )
         }
         .frame(height: hitHeight)
+        .adjustableVolume(volume, isMuted: isMuted, onChange: onChange)
     }
 }

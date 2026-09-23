@@ -90,6 +90,10 @@ cask "mixbar" do
 
   app "MixBar.app"
 
+  # A graceful quit, so an upgrade does not replace the app under a running
+  # mixer and leave its taps in the audio path.
+  uninstall quit: "com.quentinved.MixBar"
+
   zap trash: [
     "~/Library/Preferences/com.quentinved.MixBar.plist",
     "~/Library/Logs/MixBar.log",

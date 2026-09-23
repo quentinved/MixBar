@@ -59,5 +59,6 @@ struct ChannelFader: View {
                     .onEnded { _ in isDragging = false }
             )
         }
+        .adjustableVolume(volume, isMuted: isMuted, onChange: onChange)
     }
 }

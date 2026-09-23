@@ -90,7 +90,6 @@ that is the most valuable thing in the repo. Match it.
 
 The things that aren't built yet, roughly easiest first:
 
-- Launch at login (`SMAppService`)
 - Sleep/wake handling — the aggregate device needs rebuilding after wake
 - Global hotkeys
 - Per-app output routing (send Spotify to headphones, everything else to speakers)

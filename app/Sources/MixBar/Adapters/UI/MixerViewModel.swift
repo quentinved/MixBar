@@ -1,6 +1,7 @@
 import AppKit
 import Combine
 import Foundation
+import ServiceManagement
 
 /// Driving adapter: owns the timers, so the core need not know when to poll.
 @MainActor
@@ -8,8 +9,7 @@ final class MixerViewModel: ObservableObject {
     @Published private(set) var snapshot = MixerSnapshot()
     @Published private(set) var levels: [AudioAppID: Float] = [:]
 
-    // Published, not forwarding: as pass-throughs the view never learned they
-    // changed, so switching layout re-rendered nothing.
+    // Published, not forwarded: as pass-throughs the view never re-rendered.
     @Published var showIdleApps: Bool = false {
         didSet {
             guard showIdleApps != mixer.showIdleApps else { return }
@@ -25,6 +25,8 @@ final class MixerViewModel: ObservableObject {
             reload()
         }
     }
+
+    @Published private(set) var opensAtLogin = false
 
     private let mixer: MixerControlling
     private var pollTimer: Timer?
@@ -44,6 +46,10 @@ final class MixerViewModel: ObservableObject {
         }
         RunLoop.main.add(timer, forMode: .common)
         pollTimer = timer
+
+        mixer.observeChanges { [weak self] in
+            Task { @MainActor in self?.reload() }
+        }
     }
 
     deinit {
@@ -72,7 +78,6 @@ final class MixerViewModel: ObservableObject {
         reload()
     }
 
-    /// Meters run only while the popover is open.
     func startMetering() {
         guard meterTimer == nil else { return }
         let timer = Timer(timeInterval: 1.0 / 15, repeats: true) { [weak self] _ in
@@ -91,41 +96,58 @@ final class MixerViewModel: ObservableObject {
         levels = [:]
     }
 
-    func shutdown() {
-        stopMetering()
-        pollTimer?.invalidate()
-        pollTimer = nil
-        mixer.shutdown()
+    /// Read from the system, never stored, so it matches the Login Items pane.
+    func refreshOpensAtLogin() {
+        opensAtLogin = SMAppService.mainApp.status == .enabled
     }
 
-    /// Taps are gated by `kTCCServiceAudioCapture`, which System Settings shows
-    /// as `Privacy_AudioCapture`, and it is not Microphone: a different permission.
+    func toggleOpensAtLogin() {
+        let service = SMAppService.mainApp
+        do {
+            if service.status == .enabled {
+                try service.unregister()
+            } else {
+                try service.register()
+            }
+        } catch {
+            DebugLog.write { "login item: \(error)" }
+        }
+        if service.status == .requiresApproval {
+            SMAppService.openSystemSettingsLoginItems()
+        }
+        refreshOpensAtLogin()
+    }
+
+    /// Audio capture, not Microphone: a different permission.
     func openPrivacySettings() {
         open("x-apple.systempreferences:com.apple.preference.security?Privacy_AudioCapture")
+    }
+
+    /// A page, not a request: the app makes no network calls.
+    func checkForUpdates() {
+        open("https://github.com/quentinved/MixBar/releases/latest")
     }
 
     func reportBug() {
         open("https://github.com/quentinved/MixBar/issues/new?template=bug_report.yml")
     }
 
-    /// The version goes in the subject because it is the detail people leave
-    /// out, and an audio bug without it says nothing.
+    /// The version is the detail bug reports leave out.
     func emailDeveloper() {
-        let version = Bundle.main
-            .object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
         let subject = "MixBar \(version) bug report"
             .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "MixBar"
         open("mailto:contact@quentinvedrenne.com?subject=\(subject)")
     }
+
+    let version = Bundle.main
+        .object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
 
     private func open(_ string: String) {
         guard let url = URL(string: string) else { return }
         NSWorkspace.shared.open(url)
     }
 
-    /// The bundle fallback matters when the process is gone but the row is
-    /// still listed, which is every row under --demo and any app with a
-    /// remembered volume that has since quit.
+    /// Falls back to the bundle for rows whose process is gone, as under --demo.
     func icon(for application: AudioApplication) -> NSImage? {
         if let running = NSRunningApplication(
             processIdentifier: application.processIdentifier)?.icon {
@@ -135,8 +157,7 @@ final class MixerViewModel: ObservableObject {
               let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID)
         else { return nil }
         let icon = NSWorkspace.shared.icon(forFile: url.path)
-        // Defaults to 32pt, which AppKit then hands over as the best match for
-        // a 26pt row and SwiftUI scales up into mush on a Retina screen.
+        // The default 32pt image scales up into mush on a Retina screen.
         icon.size = NSSize(width: 128, height: 128)
         return icon
     }

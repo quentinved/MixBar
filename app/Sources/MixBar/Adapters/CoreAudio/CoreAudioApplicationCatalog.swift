@@ -6,9 +6,18 @@ import Foundation
 final class CoreAudioApplicationCatalog: AudioApplicationCatalog {
     private let registry: ProcessRegistry
     private let ownProcessIdentifier = ProcessInfo.processInfo.processIdentifier
+    private let observer = PropertyObserver()
 
     init(registry: ProcessRegistry) {
         self.registry = registry
+        observer.listen(
+            to: AudioObjectID(kAudioObjectSystemObject),
+            for: [kAudioHardwarePropertyProcessObjectList])
+    }
+
+    /// Without it, an app resumed while its taps idle is unmuted until the next poll.
+    func observeChanges(_ handler: @escaping () -> Void) {
+        observer.observe(handler)
     }
 
     private struct Entry {
@@ -38,6 +47,8 @@ final class CoreAudioApplicationCatalog: AudioApplicationCatalog {
 
     private func groupedByOwner() -> [AudioAppID: [Entry]] {
         guard let processes = try? AudioHardwareSystem.shared.processes else { return [:] }
+        observer.listen(
+            toOnly: Set(processes.map(\.id)), for: [kAudioProcessPropertyIsRunningOutput])
 
         var groups: [AudioAppID: [Entry]] = [:]
         for process in processes {

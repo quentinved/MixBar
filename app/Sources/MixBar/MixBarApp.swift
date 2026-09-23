@@ -4,10 +4,19 @@ import SwiftUI
 /// Taps and aggregate devices registered with coreaudiod outlive the process:
 /// unremoved, they sit in the audio path until coreaudiod is restarted.
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    var onTerminate: (() -> Void)?
+    private var termination: DispatchSourceSignal?
+
+    /// SIGTERM skips `applicationWillTerminate` unless turned into a normal quit.
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        signal(SIGTERM, SIG_IGN)
+        let source = DispatchSource.makeSignalSource(signal: SIGTERM, queue: .main)
+        source.setEventHandler { NSApp.terminate(nil) }
+        source.resume()
+        termination = source
+    }
 
     func applicationWillTerminate(_ notification: Notification) {
-        onTerminate?()
+        Composition.mixer.shutdown()
     }
 }
 
@@ -15,9 +24,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 /// the App, which built a second graph polling behind the observed one.
 enum Composition {
     static let mixer: MixerControlling = {
-        // --demo swaps every driven port for a scripted one, so the app runs
-        // with no device, no permission and nothing playing. It is how the
-        // screenshots are taken; a normal launch never reaches it.
+        // --demo swaps every driven port for a scripted one, for screenshots.
         let arguments = CommandLine.arguments
         if arguments.contains("--demo") || Screenshot.requestedPose(arguments) != nil {
             return DemoComposition.mixer()
@@ -54,7 +61,6 @@ struct MixBarApp: App {
     var body: some Scene {
         MenuBarExtra {
             MixerView(viewModel: viewModel)
-                .onAppear { delegate.onTerminate = { [viewModel] in viewModel.shutdown() } }
         } label: {
             Image(systemName: "slider.vertical.3")
         }

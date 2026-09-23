@@ -1,7 +1,6 @@
 import Foundation
 
-/// A scripted roster: one app as the demo should portray it, plus the shape of
-/// the meter it drives.
+/// One scripted app, plus the shape of the meter it drives.
 private struct DemoApp {
     let bundleID: String
     let name: String
@@ -11,15 +10,13 @@ private struct DemoApp {
     /// Peak at full gain, 0...1.
     let loudness: Float
 
-    /// Radians per second of the meter's slow swell, and where it starts, so
-    /// eight bars breathe independently instead of pulsing in unison.
+    /// Swell speed and phase, so the bars do not pulse in unison.
     let tempo: Float
     let phase: Float
 }
 
 private enum DemoRoster {
-    /// Real bundle IDs, because the icons are looked up from them: a demo that
-    /// renders `app.dashed` eight times is not worth screenshotting.
+    /// Real bundle IDs, so the icons resolve.
     static let apps: [DemoApp] = [
         DemoApp(
             bundleID: "com.spotify.client", name: "Spotify", isPlaying: true,
@@ -45,8 +42,7 @@ private enum DemoRoster {
             bundleID: "com.microsoft.teams2", name: "Microsoft Teams", isPlaying: true,
             mix: AppMix(volume: Volume(0.70), isMuted: true),
             loudness: 0.64, tempo: 3.3, phase: 1.9),
-        // Idle, but with a volume set: the row that shows MixBar remembers an
-        // app between launches.
+        // Idle but adjusted: shows that volumes are remembered.
         DemoApp(
             bundleID: "com.apple.podcasts", name: "Podcasts", isPlaying: false,
             mix: AppMix(volume: Volume(0.30), isMuted: false),
@@ -69,17 +65,18 @@ final class DemoApplicationCatalog: AudioApplicationCatalog {
                 isPlaying: $0.isPlaying)
         }
     }
+
+    func observeChanges(_ handler: @escaping () -> Void) {}
 }
 
-/// Synthesises meters from the clock, so the bars move like audio rather than
-/// sitting frozen at whatever the last frame happened to be.
+/// Meters synthesised from the clock, so the bars move like audio.
 final class DemoMixingEngine: AudioMixingEngine {
     var failure: String?
 
     private let start = Date()
     private var gains: [AudioAppID: Float] = [:]
 
-    func apply(gains: [AudioAppID: Float]) {
+    func apply(gains: [AudioAppID: Float], playing: Set<AudioAppID>) {
         self.gains = gains
     }
 
@@ -109,10 +106,10 @@ final class DemoOutputDirectory: AudioOutputDirectory {
     func availableOutputs() -> [AudioOutput] { Self.all }
     func currentOutput() -> AudioOutput? { selected }
     func selectOutput(_ output: AudioOutput) throws { selected = output }
+    func observeChanges(_ handler: @escaping () -> Void) {}
 }
 
-/// In memory only: a demo launch must not overwrite the real settings of
-/// whoever is running it.
+/// In memory only, so a demo never overwrites real settings.
 final class DemoSettingsStore: MixSettingsStore {
     private var settings = StoredMixes(
         mixes: Dictionary(

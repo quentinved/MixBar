@@ -1,12 +1,8 @@
 import AppKit
 import SwiftUI
 
-/// Poses the popover for a screenshot: the real view, on the demo roster, held
-/// open in a window of its own so `screencapture` can photograph it.
-///
-/// The status item cannot be clicked from a script without the Accessibility
-/// grant, and `cacheDisplay` loses the panel background, so neither route
-/// produces the image. This one is just the view, on screen, standing still.
+/// The real popover view on the demo roster, in a window `screencapture` can
+/// shoot: scripts cannot click the status item, and `cacheDisplay` loses the panel.
 enum Screenshot {
     struct Pose {
         let layout: MixerLayout
@@ -27,8 +23,7 @@ enum Screenshot {
 
         Task { @MainActor in
             let window = makeWindow(for: pose)
-            // The rows arrive on the first poll and the meters run at 15Hz, so
-            // the panel needs a moment before it is worth photographing.
+            // Give the first poll and the meters a moment to fill the panel.
             try? await Task.sleep(for: .seconds(1.5))
             print("window \(window.windowNumber)")
             fflush(stdout)
@@ -75,9 +70,7 @@ enum Screenshot {
         view.layer?.masksToBounds = true
     }
 
-    /// The popover's material is translucent over the desktop; on a page the
-    /// panel needs to be its own object, so it gets the colour that material
-    /// settles to over a neutral background.
+    /// The colour the translucent material settles to over a neutral background.
     private static func panelColor(for pose: Pose) -> NSColor {
         pose.isDark
             ? NSColor(calibratedWhite: 0.14, alpha: 1)

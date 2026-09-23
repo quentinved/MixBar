@@ -9,6 +9,7 @@ struct MixerView: View {
     @State private var levels: [AudioAppID: Float] = [:]
     @State private var layout: MixerLayout = .comfortable
     @State private var showIdleApps = false
+    @State private var opensAtLogin = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -34,10 +35,12 @@ struct MixerView: View {
         .onReceive(viewModel.$levels) { levels = $0 }
         .onReceive(viewModel.$layout) { layout = $0 }
         .onReceive(viewModel.$showIdleApps) { showIdleApps = $0 }
+        .onReceive(viewModel.$opensAtLogin) { opensAtLogin = $0 }
         .onAppear {
             snapshot = viewModel.snapshot
             layout = viewModel.layout
             showIdleApps = viewModel.showIdleApps
+            viewModel.refreshOpensAtLogin()
             viewModel.startMetering()
         }
         .onDisappear { viewModel.stopMetering() }
@@ -104,22 +107,21 @@ struct MixerView: View {
 
             Menu {
                 // A Toggle or Picker in a menu in this panel does not commit.
-                Button {
+                checkable("Show idle apps", isOn: showIdleApps) {
                     viewModel.showIdleApps.toggle()
-                } label: {
-                    if showIdleApps {
-                        Label("Show idle apps", systemImage: "checkmark")
-                    } else {
-                        Text("Show idle apps")
-                    }
                 }
                 Button("Reset all volumes") { viewModel.resetAll() }
                 Divider()
+                checkable("Open at login", isOn: opensAtLogin) {
+                    viewModel.toggleOpensAtLogin()
+                }
                 Button("Audio permission…") { viewModel.openPrivacySettings() }
                 Divider()
+                Button("Check for updates…") { viewModel.checkForUpdates() }
                 Button("Report a bug…") { viewModel.reportBug() }
                 Button("Email the developer…") { viewModel.emailDeveloper() }
                 Divider()
+                Text("MixBar \(viewModel.version)")
                 Button("Quit MixBar") { NSApplication.shared.terminate(nil) }
             } label: {
                 Image(systemName: "ellipsis")
@@ -133,6 +135,18 @@ struct MixerView: View {
         .padding(.horizontal, 12)
         .padding(.top, 10)
         .padding(.bottom, 9)
+    }
+
+    private func checkable(
+        _ title: String, isOn: Bool, action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            if isOn {
+                Label(title, systemImage: "checkmark")
+            } else {
+                Text(title)
+            }
+        }
     }
 
     private var outputPicker: some View {

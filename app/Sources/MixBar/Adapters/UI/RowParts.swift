@@ -42,6 +42,8 @@ struct MuteButton: View {
                 .frame(width: size + 4, height: size + 4)
         }
         .buttonStyle(.plain)
+        .accessibilityLabel(isMuted ? "Unmute" : "Mute")
+        .help(isMuted ? "Unmute" : "Mute")
     }
 }
 
@@ -55,6 +57,22 @@ extension View {
     /// greyed rather than hidden, so the list does not jump as apps stop playing.
     func rowChrome(cornerRadius: CGFloat, isPlaying: Bool) -> some View {
         modifier(RowChrome(cornerRadius: cornerRadius, isPlaying: isPlaying))
+    }
+
+    /// The sliders are drawn by hand, so without this VoiceOver finds nothing
+    /// to read or adjust.
+    func adjustableVolume(
+        _ volume: Float, isMuted: Bool, onChange: @escaping (Float) -> Void
+    ) -> some View {
+        accessibilityElement()
+            .accessibilityValue(isMuted ? "Muted" : "\(Int((volume * 100).rounded())) percent")
+            .accessibilityAdjustableAction { direction in
+                switch direction {
+                case .increment: onChange(min(volume + 0.05, 1))
+                case .decrement: onChange(max(volume - 0.05, 0))
+                @unknown default: break
+                }
+            }
     }
 }
 

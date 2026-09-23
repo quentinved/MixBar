@@ -28,6 +28,7 @@ struct CompactRow: View {
                 onChange: controls.onVolume,
                 thickness: 3,
                 showsKnob: false)
+                .accessibilityLabel("\(row.application.name) volume")
 
             Text("\(row.mix.percent)%")
                 .font(.system(size: 10, weight: .medium))
@@ -76,6 +77,7 @@ struct ComfortableRow: View {
                     level: controls.level,
                     isMuted: row.mix.isMuted,
                     onChange: controls.onVolume)
+                    .accessibilityLabel("\(row.application.name) volume")
             }
         }
         .padding(.horizontal, 8)
@@ -100,6 +102,7 @@ struct ChannelStrip: View {
                 isMuted: row.mix.isMuted,
                 onChange: controls.onVolume)
                 .frame(width: 26, height: 112)
+                .accessibilityLabel("\(row.application.name) volume")
 
             Text("\(row.mix.percent)")
                 .font(.system(size: 10, weight: .semibold))

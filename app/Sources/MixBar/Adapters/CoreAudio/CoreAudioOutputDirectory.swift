@@ -3,6 +3,19 @@ import Foundation
 
 /// Lists and switches the system default output device.
 final class CoreAudioOutputDirectory: AudioOutputDirectory {
+    private let observer = PropertyObserver()
+
+    init() {
+        observer.listen(
+            to: AudioObjectID(kAudioObjectSystemObject),
+            for: [kAudioHardwarePropertyDefaultOutputDevice, kAudioHardwarePropertyDevices])
+    }
+
+    /// The mixing device wraps its output, so a switch must reach the engine now.
+    func observeChanges(_ handler: @escaping () -> Void) {
+        observer.observe(handler)
+    }
+
     func availableOutputs() -> [AudioOutput] {
         guard let devices = try? AudioHardwareSystem.shared.devices else { return [] }
         return devices.compactMap { device in

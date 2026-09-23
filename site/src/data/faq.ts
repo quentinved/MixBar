@@ -29,7 +29,7 @@ export const faq: Question[] = [
   },
   {
     question: "Can it launch at login, or take a global hotkey?",
-    answer: `Not yet. Launch at login, global hotkeys, sleep and wake handling and per-app output routing are the next things to build, and <a href="${links.issues}">where help goes furthest</a>.`,
+    answer: `It opens at login if you ask it to, from the <code>…</code> menu. Global hotkeys, sleep and wake handling and per-app output routing are the next things to build, and <a href="${links.issues}">where help goes furthest</a>.`,
   },
   {
     question: "How do I uninstall it completely?",

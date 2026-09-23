@@ -53,6 +53,8 @@ Click the slider icon in the menu bar. Apps appear as they start making sound.
 | Undo everything | `…` → **Reset all volumes** |
 | Switch output device | Click the device name at the top |
 | See apps that are not currently playing | `…` → **Show idle apps** |
+| Start MixBar when you log in | `…` → **Open at login** |
+| See whether there is a newer version | `…` → **Check for updates…** (opens the releases page; the app itself never goes online) |
 
 **Three layouts**, from the segmented control at the top:
 
@@ -102,7 +104,10 @@ No kernel extension, no virtual audio driver, no installer privileges.
 
 **At default volume, MixBar creates nothing at all.** No taps, no aggregate
 device, no presence in the audio path. An app enters the audio path only once
-its slider moves, and leaves the moment it returns to 100%. This matters: an
+its slider moves, and leaves the moment it returns to 100% or quits. While
+every adjusted app is paused the taps stay built but nothing renders, so a
+paused mixer keeps neither the output nor the Mac awake, and resuming costs no
+rebuild. This matters: an
 earlier version routed everything through the mixer and caused audible
 crackling system-wide, even while mixing pure silence.
 
@@ -173,7 +178,7 @@ macOS 15 to run it.
 ```sh
 git clone https://github.com/quentinved/MixBar.git
 cd MixBar/app
-swift test                  # 37 tests, no audio hardware needed
+swift test                  # 44 tests, no audio hardware needed
 ./build.sh                  # -> build/MixBar.app
 open ../build/MixBar.app
 ```
@@ -258,9 +263,11 @@ real-time thread constraints.
 ### Tests
 
 `swift test` must pass with no audio device, no output and no permission grant
-— CI depends on it. Four suites:
+— CI depends on it. Six suites:
 
-- **Mixer rules** — the domain, driven through `MixerService` against the fakes.
+- **Mixer rules** and **Mixer lifecycle** — the domain, driven through
+  `MixerService` against the fakes; the second covers apps pausing, quitting
+  and changing underneath an existing mix.
 - **Render thread** — `renderMix` is a free function over raw buffers, so the
   IOProc's arithmetic is tested by hand-building `AudioBufferList`s. No device
   is involved, and the gain, summing, peak and buffer-layout cases are covered.
@@ -269,6 +276,9 @@ real-time thread constraints.
   `Int` or a `String`.
 - **Output devices** — how the device list is sectioned by transport kind, and
   what an unrecognised transport is called.
+- **Engine rebuilds** — when the taps must be rebuilt although the same apps
+  are routed: a helper process that starts late, or an app relaunched between
+  polls, would otherwise play around the tap at full volume.
 
 Never add a test that needs Core Audio. Name tests as the behaviour they
 protect.
@@ -364,10 +374,9 @@ audio path, and only `sudo killall coreaudiod` clears them.
 ## Status
 
 Working: per-app volume, mute, live meters, output switching, persistence by
-bundle ID, app grouping.
+bundle ID, app grouping, launch at login.
 
-Not done yet: sleep/wake handling, launch at login, global hotkeys, per-app
-output routing, and a Homebrew tap for the cask that `tools/package.sh` emits.
+Not done yet: sleep/wake handling, global hotkeys, per-app output routing, and a Homebrew tap for the cask that `tools/package.sh` emits.
 
 ## Releasing
 

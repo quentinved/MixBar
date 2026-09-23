@@ -48,7 +48,7 @@ final class MixerService: MixerControlling {
     @discardableResult
     func refresh() -> MixerSnapshot {
         applications = catalog.currentApplications()
-        engine.apply(gains: gainsForRoutedApps())
+        applyRouting()
 
         let visible = showIdleApps ? applications : applications.filter(isWorthShowing)
         let rows = visible
@@ -80,17 +80,22 @@ final class MixerService: MixerControlling {
     func resetAll() {
         mixes.removeAll()
         persist()
-        engine.apply(gains: gainsForRoutedApps())
+        applyRouting()
     }
 
     func selectOutput(_ output: AudioOutput) {
         try? outputs.selectOutput(output)
         // The engine's mixing device wraps the old output, so it must rebuild.
-        engine.apply(gains: gainsForRoutedApps())
+        applyRouting()
     }
 
     func shutdown() {
         engine.shutdown()
+    }
+
+    func observeChanges(_ handler: @escaping () -> Void) {
+        catalog.observeChanges(handler)
+        outputs.observeChanges(handler)
     }
 
     func levels() -> [AudioAppID: Float] {
@@ -150,14 +155,20 @@ final class MixerService: MixerControlling {
             mixes[id] = mix
         }
         persist()
-        engine.apply(gains: gainsForRoutedApps())
+        applyRouting()
     }
 
-    /// Only apps the user actually moved: routing means muting and re-rendering,
-    /// and doing that to every playing app crackled, even on silence.
+    private func applyRouting() {
+        let gains = gainsForRoutedApps()
+        let playing = applications.filter { $0.isPlaying && gains[$0.id] != nil }.map(\.id)
+        engine.apply(gains: gains, playing: Set(playing))
+    }
+
+    /// Only apps the user moved: routing every playing app crackled, even on
+    /// silence. Paused ones stay routed, or a pause rebuilt the mixer under the rest.
     private func gainsForRoutedApps() -> [AudioAppID: Float] {
         var gains: [AudioAppID: Float] = [:]
-        for application in applications where application.isPlaying {
+        for application in applications {
             let mix = mix(for: application.id)
             guard !mix.isDefault else { continue }
             gains[application.id] = mix.gain

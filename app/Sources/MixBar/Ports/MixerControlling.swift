@@ -19,5 +19,8 @@ protocol MixerControlling: AnyObject {
 
     func levels() -> [AudioAppID: Float]
 
+    /// Called on the main queue when the world changed and `refresh` is due.
+    func observeChanges(_ handler: @escaping () -> Void)
+
     func shutdown()
 }

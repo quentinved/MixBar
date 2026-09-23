@@ -1,4 +1,3 @@
-import AudioToolbox
 import CoreAudio
 import Foundation
 
@@ -6,19 +5,22 @@ import Foundation
 final class CoreAudioMixingEngine: AudioMixingEngine {
     private let system = AudioHardwareSystem.shared
     private let registry: ProcessRegistry
-    private let rt = RealtimeState.allocate()
 
-    private var taps: [AudioHardwareTap] = []
-    private var aggregate: AudioHardwareAggregateDevice?
-    private var ioProcID: AudioDeviceIOProcID?
+    /// Two, so the next graph is primed while the current one plays.
+    private let buffers: [RealtimeState]
 
     /// coreaudiod IPC: ~1.8s, and blocks on the first-run permission prompt.
     private let work = DispatchQueue(label: "com.quentinved.MixBar.engine")
+    private var device: MixingDevice?
 
     private let state = NSLock()
     private var routed: [AudioAppID] = []
+    private var tapped: [AudioAppID: Set<AudioObjectID>] = [:]
     private var outputUID: String?
+    private var active: RealtimeState
     private var desiredGains: [AudioAppID: Float] = [:]
+    private var desiredPlaying: Set<AudioAppID> = []
+    private var requestedRendering = false
     private var rebuildScheduled = false
     private var storedFailure: String?
 
@@ -26,37 +28,39 @@ final class CoreAudioMixingEngine: AudioMixingEngine {
 
     init(registry: ProcessRegistry) {
         self.registry = registry
+        let first = RealtimeState.allocate()
+        buffers = [first, RealtimeState.allocate()]
+        active = first
     }
 
     deinit {
-        teardown()
-        rt.deallocate()
+        device?.destroy()
+        buffers.forEach { $0.deallocate() }
     }
 
-    /// The only way to touch what `state` guards: no path can return holding it.
     private func withState<T>(_ body: () -> T) -> T {
         state.lock()
         defer { state.unlock() }
         return body()
     }
 
-    // MARK: - AudioMixingEngine
-
-    func apply(gains: [AudioAppID: Float]) {
+    func apply(gains: [AudioAppID: Float], playing: Set<AudioAppID>) {
         let wanted = Self.routable(gains)
         let output = (try? system.defaultOutputDevice).flatMap { try? $0.uid }
+        let processes = Dictionary(uniqueKeysWithValues: wanted.map {
+            ($0, Set(registry.objectIDs(for: $0)))
+        })
 
-        switch plan(wanted: wanted, gains: gains, output: output) {
+        let action = plan(
+            wanted: wanted, gains: gains, playing: playing,
+            output: output, processes: processes)
+        switch action {
         case .nothing:
             return
 
-        case .adjusted(let apps):
-            DebugLog.write {
-                let summary = apps.enumerated()
-                    .map { "\($1.raw) gain=\(gains[$1] ?? 1) heard=\(self.rt.peak[$0])" }
-                    .joined(separator: " | ")
-                return "gain update: \(summary)"
-            }
+        case .adjusted(let renderingChanged):
+            DebugLog.write { "gain update: \(gains.map { "\($0.raw)=\($1)" }.sorted())" }
+            if renderingChanged { work.async { [weak self] in self?.syncRendering() } }
 
         case .rebuild(let previous):
             DebugLog.write {
@@ -68,40 +72,52 @@ final class CoreAudioMixingEngine: AudioMixingEngine {
     }
 
     func shutdown() {
-        work.sync { self.teardown() }
+        work.sync {
+            device?.destroy()
+            device = nil
+            withState {
+                routed = []
+                tapped = [:]
+                outputUID = nil
+            }
+        }
     }
 
     func takePeak(for id: AudioAppID) -> Float {
-        guard let index = withState({ routed.firstIndex(of: id) }) else { return 0 }
+        guard let (rt, index) = withState({ routed.firstIndex(of: id).map { (active, $0) } })
+        else { return 0 }
         let value = rt.peak[index]
         rt.peak[index] = 0
         return value
     }
 
-    // MARK: - Deciding what to do
-
     private enum Action {
         case nothing
-        case adjusted([AudioAppID])
+        case adjusted(renderingChanged: Bool)
         case rebuild(previous: [AudioAppID])
     }
 
-    /// Returns a decision rather than acting, so the queue hop happens unlocked.
     private func plan(
         wanted: [AudioAppID],
         gains: [AudioAppID: Float],
-        output: String?
+        playing: Set<AudioAppID>,
+        output: String?,
+        processes: [AudioAppID: Set<AudioObjectID>]
     ) -> Action {
         withState { () -> Action in
             desiredGains = gains
+            desiredPlaying = playing
             guard !wanted.isEmpty || !routed.isEmpty else { return .nothing }
 
-            // Rebuilding interrupts audio; a pure volume change is a few word writes.
-            if wanted == routed, output == outputUID {
+            // A volume change is a few word writes; a rebuild interrupts audio.
+            if wanted == routed, output == outputUID,
+               !Self.hasUntappedProcesses(processes, tapped: tapped) {
                 for (index, id) in routed.enumerated() {
-                    rt.gain[index] = gains[id] ?? 1
+                    active.gain[index] = gains[id] ?? 1
                 }
-                return .adjusted(routed)
+                let rendering = !playing.isDisjoint(with: routed)
+                defer { requestedRendering = rendering }
+                return .adjusted(renderingChanged: rendering != requestedRendering)
             }
 
             guard !rebuildScheduled else { return .nothing }
@@ -115,153 +131,68 @@ final class CoreAudioMixingEngine: AudioMixingEngine {
         Array(gains.keys.sorted { $0.raw < $1.raw }.prefix(RealtimeState.maxTaps))
     }
 
-    // MARK: - Core Audio
+    /// A process that joined after the tap was built plays around it, unmuted.
+    static func hasUntappedProcesses(
+        _ current: [AudioAppID: Set<AudioObjectID>],
+        tapped: [AudioAppID: Set<AudioObjectID>]
+    ) -> Bool {
+        current.contains { id, processes in !processes.isSubset(of: tapped[id] ?? []) }
+    }
 
     private func performRebuild() {
-        let gains = withState { () -> [AudioAppID: Float] in
-            rebuildScheduled = false
-            return desiredGains
+        let wanted = withState { Self.routable(desiredGains) }
+
+        let previous = device
+        var next: MixingDevice?
+        if !wanted.isEmpty {
+            do {
+                next = try MixingDevice.build(apps: wanted, registry: registry, rt: spareBuffer)
+                withState { storedFailure = nil }
+            } catch {
+                withState { storedFailure = "\(error)" }
+            }
         }
 
-        teardown()
-        let wanted = Self.routable(gains)
-        guard !wanted.isEmpty else { return }
+        publish(next)
+        device = next
+        // Start before stopping the old: a doubled buffer beats a gap at full volume.
+        syncRendering()
+        previous?.destroy()
+        DebugLog.write { "built \(next?.apps.count ?? 0) tap(s): \(wanted.map(\.raw))" }
+    }
 
+    private var spareBuffer: RealtimeState {
+        device?.rt.gain == buffers[0].gain ? buffers[1] : buffers[0]
+    }
+
+    /// Primes from the latest gains: the slider kept moving during the build.
+    private func publish(_ next: MixingDevice?) {
+        withState {
+            // Cleared only now, or a refresh during the build queues another.
+            rebuildScheduled = false
+            routed = next?.apps ?? []
+            tapped = next?.processes ?? [:]
+            outputUID = next?.outputUID
+            requestedRendering = !desiredPlaying.isDisjoint(with: routed)
+            guard let next else { return }
+
+            active = next.rt
+            for (index, id) in routed.enumerated() {
+                active.gain[index] = desiredGains[id] ?? 1
+                active.peak[index] = 0
+            }
+            active.count.pointee = Int32(routed.count)
+        }
+    }
+
+    private func syncRendering() {
+        let rendering = withState { requestedRendering }
+        guard let device, device.isRendering != rendering else { return }
         do {
-            try build(apps: wanted, gains: gains)
-            withState { storedFailure = nil }
+            try device.setRendering(rendering)
+            DebugLog.write { rendering ? "rendering started" : "rendering paused" }
         } catch {
             withState { storedFailure = "\(error)" }
-            teardown()
-        }
-    }
-
-    private func build(apps: [AudioAppID], gains: [AudioAppID: Float]) throws {
-        let (entries, accepted) = try makeTaps(for: apps)
-        guard !entries.isEmpty else { return }
-
-        let aggregate = try makeAggregateDevice(tapEntries: entries)
-        self.aggregate = aggregate
-
-        withState { routed = accepted }
-        primeRealtimeState(accepted: accepted, gains: gains)
-
-        try startRendering(on: aggregate)
-        DebugLog.write {
-            "built \(accepted.count) tap(s): \(accepted.map(\.raw).joined(separator: ", "))"
-        }
-    }
-
-    private func makeTaps(
-        for apps: [AudioAppID]
-    ) throws -> (entries: [[String: Any]], accepted: [AudioAppID]) {
-        var entries: [[String: Any]] = []
-        var accepted: [AudioAppID] = []
-
-        for id in apps {
-            let objectIDs = registry.objectIDs(for: id)
-            guard !objectIDs.isEmpty else { continue }
-
-            // One tap for all of them, or a browser moves audio to the next.
-            let description = CATapDescription(stereoMixdownOfProcesses: objectIDs)
-            description.name = "MixBar"
-            description.isPrivate = true
-            // The app is silent while we hold the tap, so our gain is its volume.
-            description.muteBehavior = .mutedWhenTapped
-
-            guard let tap = try system.makeProcessTap(description: description) else {
-                throw MixerEngineError.tapNotCreated
-            }
-            taps.append(tap)
-            accepted.append(id)
-            entries.append([
-                kAudioSubTapUIDKey: try tap.uid,
-                kAudioSubTapDriftCompensationKey: true,
-            ])
-        }
-        return (entries, accepted)
-    }
-
-    private func makeAggregateDevice(
-        tapEntries: [[String: Any]]
-    ) throws -> AudioHardwareAggregateDevice {
-        guard let output = try system.defaultOutputDevice else { throw MixerEngineError.noOutput }
-        let uid = try output.uid
-        withState { outputUID = uid }
-
-        let composition: [String: Any] = [
-            kAudioAggregateDeviceNameKey: "MixBar Mixer",
-            kAudioAggregateDeviceUIDKey: UUID().uuidString,
-            kAudioAggregateDeviceMainSubDeviceKey: uid,
-            kAudioAggregateDeviceIsPrivateKey: true,
-            kAudioAggregateDeviceIsStackedKey: false,
-            kAudioAggregateDeviceTapAutoStartKey: true,
-            kAudioAggregateDeviceSubDeviceListKey: [[kAudioSubDeviceUIDKey: uid]],
-            kAudioAggregateDeviceTapListKey: tapEntries,
-        ]
-        guard let aggregate = try system.makeAggregateDevice(description: composition) else {
-            throw MixerEngineError.aggregateNotCreated
-        }
-        return aggregate
-    }
-
-    private func primeRealtimeState(accepted: [AudioAppID], gains: [AudioAppID: Float]) {
-        for (index, id) in accepted.enumerated() {
-            rt.gain[index] = gains[id] ?? 1
-            rt.peak[index] = 0
-        }
-        rt.count.pointee = Int32(accepted.count)
-    }
-
-    private func startRendering(on aggregate: AudioHardwareAggregateDevice) throws {
-        // Capture pointers, never self: the render thread must not retain.
-        let rt = self.rt
-        let render: AudioDeviceIOBlock = { _, input, _, output, _ in
-            renderMix(input: input, output: output, state: rt)
-        }
-
-        var procID: AudioDeviceIOProcID?
-        let status = AudioDeviceCreateIOProcIDWithBlock(&procID, aggregate.id, nil, render)
-        guard status == noErr, let procID else { throw MixerEngineError.renderNotStarted(status) }
-        ioProcID = procID
-        try aggregate.start(IOProcID: procID)
-    }
-
-    private func teardown() {
-        if let aggregate, let ioProcID {
-            try? aggregate.stop(IOProcID: ioProcID)
-            AudioDeviceDestroyIOProcID(aggregate.id, ioProcID)
-        }
-        // The aggregate references the taps, so it has to go first.
-        if let aggregate { try? system.destroyAggregateDevice(aggregate) }
-        for tap in taps { try? system.destroyProcessTap(tap) }
-        taps = []
-        aggregate = nil
-        ioProcID = nil
-        rt.count.pointee = 0
-        withState {
-            routed = []
-            outputUID = nil
-        }
-    }
-}
-
-enum MixerEngineError: Error, CustomStringConvertible {
-    case tapNotCreated
-    case aggregateNotCreated
-    case noOutput
-
-    /// AudioHardwareError only became constructible in the macOS 26 SDK, and
-    /// this has to build on the Xcode 16 the README asks for.
-    case renderNotStarted(OSStatus)
-
-    var description: String {
-        switch self {
-        case .tapNotCreated: return "Could not create an audio tap."
-        case .aggregateNotCreated: return "Could not create the mixing device."
-        case .noOutput: return "No default output device."
-        case .renderNotStarted(let status):
-            return "Could not start the mixer (status \(status))."
         }
     }
 }
